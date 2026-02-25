@@ -4,6 +4,10 @@
 
 ---
 
+> ![WODX 홈 화면](public/mok.png)
+
+---
+
 ## 🛠 기술 스택
 
 | 구분       | 기술                    | 역할                         |
@@ -192,5 +196,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=
 ```
 
 ---
+
+<!-- README.md 안에서 이렇게 사용 -->
 
 _WODX — Build The Athlete_ 🔥
