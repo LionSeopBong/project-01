@@ -1,10 +1,8 @@
-"use client";
-
-import GlowButton from "@/app/components/ui/GlowButton";
 import Image from "next/image";
 import Link from "next/link";
+import GlowButton from "@/app/components/ui/GlowButton";
 
-export default function Home() {
+export default function OnboardingPage() {
   return (
     <div className="flex justify-center items-center min-h-screen ">
       <div className="relative w-full min-w-[340px] h-screen">
@@ -14,7 +12,7 @@ export default function Home() {
         </div>
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-16">
           <Link href="/login">
-            <GlowButton onClick={() => console.log("시작")}>START</GlowButton>
+            <GlowButton>START</GlowButton>
           </Link>
         </div>
       </div>

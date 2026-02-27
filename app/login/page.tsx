@@ -1,61 +1,34 @@
 "use client";
+import { signInWithGoogle } from "@/lib/auth";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 
-import { useForm } from "react-hook-form";
-type LoginFormData = {
-  email: string;
-  password: string;
-};
-export default function Login() {
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitting, isSubmitted, errors },
-  } = useForm<LoginFormData>();
+export default function LoginPage() {
+  const router = useRouter();
+
+  const handleLogin = async () => {
+    try {
+      const { isNewUser } = await signInWithGoogle();
+      if (isNewUser) {
+        router.push("/onboarding/profile");
+      } else {
+        router.push("/home");
+      }
+    } catch (error) {
+      console.log("로그인 실패", error);
+    }
+  };
   return (
-    <>
-      <form
-        noValidate
-        onSubmit={handleSubmit(async (data) => {
-          await new Promise((r) => setTimeout(r, 1000));
-          console.log("딜레이됨");
-          alert(JSON.stringify(data));
-        })}
-        className="flex flex-col p-5 max-w-[375px] w-full mx-auto "
-      >
-        <label htmlFor="email" className="my-3 font-bold text-lg">
-          이메일
-        </label>
-        <input
-          className="border p-2 text-lg aria-[invalid=false]:border-green-500 aria-[invalid=true]:border-red-500"
-          id="email"
-          type="email"
-          placeholder="text@email.com"
-          {...register("email", {
-            required: "이메일은 필수 입력입니다.",
-            pattern: { value: /\S+@\S+\.\S+/, message: "이메일 형식에 맞지 않습니다." },
-          })}
-          aria-invalid={isSubmitted ? (errors.email ? "true" : "false") : undefined}
-        />
-        {errors.email && <small role="alert">{errors.email.message}</small>}
-        <label htmlFor="password" className="my-3 font-bold text-lg">
-          비밀번호
-        </label>
-        <input
-          className="border p-2 text-lg aria-[invalid=false]:border-green-500 aria-[invalid=true]:border-red-500"
-          id="password"
-          type="password"
-          placeholder="********"
-          {...register("password", {
-            required: "비밀번호는 필수 입력입니다.",
-            minLength: { value: 8, message: "8자리 이상 비밀먼호를 입력해주세요." },
-          })}
-          aria-invalid={isSubmitted ? (errors.password ? "true" : "false") : undefined}
-        />
-        {errors.password && <small role="alert">{errors.password.message}</small>}
-        <button type="submit" disabled={isSubmitting} className="my-4 disabled:opacity-50 disabled:cursor-not-allowed bg-blue-500 rounded-md p-4 text-white">
-          {isSubmitting ? "로그인 중..." : "로그인"}
-        </button>
-      </form>
-    </>
+    <main className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center gap-8">
+      <Image src="/bg/logo3.png" alt="WODX" width={200} height={40} priority />
+
+      <button onClick={handleLogin} className="flex items-center gap-3 bg-white text-black font-bold px-9 py-3 rounded-full hover:bg-zinc-200 transition">
+        {/* <Image src="/icons/google.svg" alt="Google" width={20} height={20} /> */}
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+          <path d="M564 325.8C564 467.3 467.1 568 324 568C186.8 568 76 457.2 76 320C76 182.8 186.8 72 324 72C390.8 72 447 96.5 490.3 136.9L422.8 201.8C334.5 116.6 170.3 180.6 170.3 320C170.3 406.5 239.4 476.6 324 476.6C422.2 476.6 459 406.2 464.8 369.7L324 369.7L324 284.4L560.1 284.4C562.4 297.1 564 309.3 564 325.8z" />
+        </svg>
+        Google로 시작하기
+      </button>
+    </main>
   );
 }
