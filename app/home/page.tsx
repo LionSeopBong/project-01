@@ -40,7 +40,6 @@ export default function Home() {
         <p className="text-zinc-500 text-sm">{new Date().toLocaleDateString("ko-KR", { weekday: "long", month: "long", day: "numeric" })}</p>
         <h1 className="text-2xl font-black text-white mt-1">안녕하세요 👋</h1>
       </div>
-      <div className="text-white">여기</div>
 
       {/* WOD 카드 */}
       <section>
