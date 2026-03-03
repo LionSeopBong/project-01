@@ -15,3 +15,15 @@ export interface Wod {
   movements: Movement[];
   createdAt: any;
 }
+
+export interface User {
+  id: string;
+  name: string;
+  gender: string;
+  weight: number;
+  height: number;
+  profileImage: string;
+  unit: string;
+  role: "admin" | "user";
+  createdAt: any;
+}

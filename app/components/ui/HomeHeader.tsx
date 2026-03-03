@@ -1,8 +1,10 @@
+import { useAuth } from "@/context/AuthContext";
 import { logOut } from "@/lib/auth";
+import { getUser } from "@/lib/firestore";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const menuItems = [
   { href: "/wod", label: "WOD", icon: "💪" },
@@ -12,6 +14,8 @@ const menuItems = [
 ];
 
 export default function HomeHeader() {
+  const { user } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
@@ -19,6 +23,14 @@ export default function HomeHeader() {
     await logOut();
     router.push("/");
   };
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (!user) return;
+      const userData = await getUser(user.uid);
+      setIsAdmin(userData?.role === "admin");
+    };
+    checkAdmin();
+  }, [user]);
   return (
     <>
       {/* 헤더 */}
@@ -93,6 +105,16 @@ export default function HomeHeader() {
             로그아웃
           </button>
         </div>
+        {isAdmin && (
+          <Link
+            href="/admin/wod"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center gap-4 px-4 py-4 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+          >
+            <span className="text-xl">⚙️</span>
+            <span className="font-bold tracking-wider uppercase text-sm">WOD 관리</span>
+          </Link>
+        )}
       </div>
     </>
   );
