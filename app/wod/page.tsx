@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { getWodByDate, getComments, addComment, deleteComments } from "@/lib/firestore";
+import { getWodByDate, getComments, addComment, deleteComments, getUser } from "@/lib/firestore";
 import WodCard from "@/app/components/ui/WodCard";
 import HomeHeader from "@/app/components/ui/HomeHeader";
 import { Wod, WodComment } from "@/types/wod";
 import { Timestamp } from "firebase/firestore";
+import ReactDatePicker from "react-datepicker";
+import { ko } from "date-fns/locale"; // 한국어 로케일
+import "react-datepicker/dist/react-datepicker.css";
 
 // 날짜 포맷 유틸
 const formatDate = (date: Date) => date.toISOString().split("T")[0];
@@ -27,6 +30,7 @@ export default function WodPage() {
   const [comments, setComments] = useState<WodComment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const today = new Date();
   const isToday = formatDate(currentDate) === formatDate(today);
@@ -82,7 +86,14 @@ export default function WodPage() {
     const updated = await getComments(wod!.id);
     setComments(updated);
   };
-
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (!user) return;
+      const userData = await getUser(user.uid);
+      setIsAdmin(userData?.role === "admin");
+    };
+    checkAdmin();
+  }, [user]);
   return (
     <main className="min-h-screen bg-[#0a0a0a] pb-24">
       <HomeHeader />
@@ -99,10 +110,29 @@ export default function WodPage() {
           </button>
 
           {/* 현재 날짜 */}
-          <div className="text-center">
-            <p className="text-white font-bold text-sm">{currentDate.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}</p>
-            {isToday && <span className="text-xs text-[#E63946] font-bold">TODAY</span>}
-          </div>
+
+          {/* 날짜 클릭 → DatePicker */}
+          <ReactDatePicker
+            selected={currentDate}
+            onChange={(date: Date | null) => {
+              if (date) setCurrentDate(date);
+            }}
+            maxDate={today} // 오늘 이후 선택 불가
+            locale={ko} // 한국어
+            dateFormat="yyyy.MM.dd"
+            customInput={
+              <button className="text-center">
+                <p className="text-white font-bold text-sm">
+                  {currentDate.toLocaleDateString("ko-KR", {
+                    month: "long",
+                    day: "numeric",
+                    weekday: "short",
+                  })}
+                </p>
+                {isToday && <span className="text-xs text-[#E63946] font-bold">TODAY</span>}
+              </button>
+            }
+          />
 
           {/* Next - 오늘이면 비활성 */}
           <button
@@ -122,7 +152,7 @@ export default function WodPage() {
           {wodLoading ? (
             <div className="bg-zinc-900 rounded-2xl h-48 animate-pulse" />
           ) : wod && wod.parts ? (
-            <WodCard wod={wod} showDetail={false} />
+            <WodCard wod={wod} showDetail={false} isAdmin={isAdmin} />
           ) : (
             <div className="bg-zinc-900 rounded-2xl p-5 text-zinc-500 text-sm text-center">이 날의 WOD가 등록되지 않았어요 😢</div>
           )}

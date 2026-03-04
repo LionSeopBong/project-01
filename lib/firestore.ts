@@ -1,6 +1,6 @@
 import { db } from "@/lib/firebase";
 import { User, Wod, WodComment } from "@/types/wod";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, Timestamp, updateDoc, where } from "firebase/firestore";
 
 //오늘 날짜 WOD 조회
 export const getTodayWod = async (): Promise<Wod | null> => {
@@ -44,6 +44,16 @@ export const getWodByDate = async (date: string): Promise<Wod | null> => {
   if (snapshot.empty) return null;
   const doc = snapshot.docs[0];
   return { id: doc.id, ...doc.data() } as Wod;
+};
+// WOD 삭제
+export const deleteWod = async (wodId: string) => {
+  await deleteDoc(doc(db, "wods", wodId));
+};
+
+// WOD 수정
+export const updateWod = async (wodId: string, wodData: Partial<Omit<Wod, "id">>) => {
+  const ref = doc(db, "wods", wodId);
+  await updateDoc(ref, wodData);
 };
 // 댓글 조회
 export const getComments = async (wodId: string): Promise<WodComment[]> => {

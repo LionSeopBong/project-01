@@ -1,1 +1,45 @@
 @import "tailwindcss";
+
+/* react-datepicker 다크 테마 */
+.react-datepicker {
+  background-color: #1a1a1a !important;
+  border: 1px solid #333 !important;
+  font-family: inherit !important;
+}
+
+.react-datepicker__header {
+  background-color: #111 !important;
+  border-bottom: 1px solid #333 !important;
+}
+
+.react-datepicker__current-month,
+.react-datepicker__day-name {
+  color: #fff !important;
+}
+
+.react-datepicker__day {
+  color: #ccc !important;
+}
+
+.react-datepicker__day:hover {
+  background-color: #333 !important;
+  color: #fff !important;
+}
+
+.react-datepicker__day--selected {
+  background-color: #e63946 !important;
+  color: #fff !important;
+}
+
+.react-datepicker__day--today {
+  color: #e63946 !important;
+  font-weight: bold !important;
+}
+
+.react-datepicker__day--disabled {
+  color: #444 !important;
+}
+
+.react-datepicker__navigation-icon::before {
+  border-color: #fff !important;
+}
