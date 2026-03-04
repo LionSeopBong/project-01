@@ -46,8 +46,8 @@ export default function Home() {
         <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Today&apos;s WOD</h2>
         {wodLoading ? (
           <div className="bg-zinc-900 rounded-2xl h-48 animate-pulse" />
-        ) : wod && wod.movements ? (
-          <WodCard title={wod.title} type={wod.type} rounds={wod.rounds} timeCap={wod.timeCap} movements={wod.movements} />
+        ) : wod && wod.parts ? (
+          <WodCard wod={wod} />
         ) : (
           <div className="bg-zinc-900 rounded-2xl p-5 text-zinc-500 text-sm text-center">오늘의 WOD가 아직 등록되지 않았어요 😢</div>
         )}
