@@ -1,11 +1,30 @@
 import { db } from "@/lib/firebase";
 import { User, Wod, WodComment } from "@/types/wod";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, Timestamp, updateDoc, where } from "firebase/firestore";
+import {
+  addDoc,
+  arrayRemove,
+  arrayUnion,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  increment,
+  limit,
+  orderBy,
+  query,
+  Timestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 
 //오늘 날짜 WOD 조회
 export const getTodayWod = async (): Promise<Wod | null> => {
-  const today = new Date().toISOString().split("T")[0];
-  //  console.log("오늘 날짜:", today);
+  // const today = new Date().toISOString().split("T")[0];
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+  // console.log("오늘 날짜:", today);
 
   const q = query(collection(db, "wods"), where("date", "==", today), limit(1));
 
@@ -59,6 +78,7 @@ export const updateWod = async (wodId: string, wodData: Partial<Omit<Wod, "id">>
 export const getComments = async (wodId: string): Promise<WodComment[]> => {
   const q = query(collection(db, "comments"), where("wodId", "==", wodId), orderBy("createdAt", "asc"));
   const snapshot = await getDocs(q);
+
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as WodComment[];
 };
 // 댓글 등록
@@ -72,4 +92,22 @@ export const addComment = async (comment: Omit<WodComment, "id">) => {
 // 댓글 삭제
 export const deleteComments = async (CommentID: string) => {
   await deleteDoc(doc(db, "comments", CommentID));
+};
+// 댓글 좋아요
+export const toggleLike = async (commentId: string, userId: string, isLiked: boolean) => {
+  const commentRef = doc(db, "comments", commentId);
+
+  if (isLiked) {
+    // 취소
+    await updateDoc(commentRef, {
+      likedBy: arrayRemove(userId),
+      likes: increment(-1),
+    });
+  } else {
+    // 추가
+    await updateDoc(commentRef, {
+      likedBy: arrayUnion(userId),
+      likes: increment(1),
+    });
+  }
 };

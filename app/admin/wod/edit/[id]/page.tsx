@@ -259,14 +259,14 @@ export default function EditWodPage() {
                           value={movement.reps}
                           onChange={(e) => updateMovement(partIndex, movIndex, "reps", Number(e.target.value))}
                           placeholder="Reps"
-                          className="flex-1 bg-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
+                          className="flex-1 min-w-0 bg-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
                         />
                         <input
                           type="number"
                           value={movement.distance}
                           onChange={(e) => updateMovement(partIndex, movIndex, "distance", Number(e.target.value))}
                           placeholder="Distance"
-                          className="flex-1 bg-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
+                          className="flex-1 min-w-0 bg-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
                         />
                         <select
                           value={movement.unit}

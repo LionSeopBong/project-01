@@ -46,5 +46,7 @@ export interface WodComment {
   userName: string;
   profileImage: string;
   content: string;
+  likes: number; // 댓글 좋아요
+  likedBy: string[]; // 좋아요 누른 유저 uid 배열
   createdAt: any;
 }

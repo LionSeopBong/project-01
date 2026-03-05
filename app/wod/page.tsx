@@ -3,7 +3,7 @@
 import { forwardRef, useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { getWodByDate, getComments, addComment, deleteComments, getUser } from "@/lib/firestore";
+import { getWodByDate, getComments, addComment, deleteComments, getUser, toggleLike } from "@/lib/firestore";
 import WodCard from "@/app/components/ui/WodCard";
 import HomeHeader from "@/app/components/ui/HomeHeader";
 import { Wod, WodComment } from "@/types/wod";
@@ -45,6 +45,7 @@ export default function WodPage() {
     const fetchWod = async () => {
       setWodLoading(true);
       setComments([]);
+      setWod(null);
       const data = await getWodByDate(formatDate(currentDate));
       setWod(data);
       setWodLoading(false);
@@ -69,6 +70,8 @@ export default function WodPage() {
         userName: user.displayName ?? "익명",
         profileImage: user.photoURL ?? "",
         content: commentText.trim(),
+        likes: 0,
+        likedBy: [],
         createdAt: Timestamp.now(),
       });
       setCommentText("");
@@ -86,6 +89,14 @@ export default function WodPage() {
     const updated = await getComments(wod!.id);
     setComments(updated);
   };
+  // 댓글 좋아요
+  const handleToggleLike = async (commentId: string, isLiked: boolean) => {
+    if (!user || !wod) return;
+    toggleLike(commentId, user.uid, isLiked);
+    const updated = await getComments(wod?.id);
+    setComments(updated);
+  };
+
   useEffect(() => {
     const checkAdmin = async () => {
       if (!user) return;
@@ -189,28 +200,44 @@ export default function WodPage() {
               <p className="text-zinc-600 text-sm text-center py-8">첫 번째 댓글을 남겨보세요! 🔥</p>
             ) : (
               <ul className="space-y-4">
-                {comments.map((comment) => (
-                  <li key={comment.id} className="flex gap-3">
-                    {comment.profileImage ? (
-                      <img src={comment.profileImage} alt={comment.userName} className="w-8 h-8 rounded-full shrink-0" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-zinc-700 shrink-0" />
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-white text-xs font-bold">{comment.userName}</span>
-                        <span className="text-zinc-600 text-xs">{comment.createdAt?.toDate?.()?.toLocaleDateString("ko-KR")}</span>
-                        {/* 본인 댓글에만 삭제 버튼 표시 */}
-                        {user?.uid === comment.userId && (
-                          <button onClick={() => handleDeleteComment(comment.id)} className="text-zinc-600 hover:text-red-500 text-xs transition">
-                            삭제
+                {comments.map((comment) => {
+                  const isLiked = comment.likedBy?.includes(user?.uid ?? "");
+                  return (
+                    <li key={comment.id} className="flex gap-3">
+                      {comment.profileImage ? (
+                        <img src={comment.profileImage} alt={comment.userName} className="w-8 h-8 rounded-full shrink-0" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-zinc-700 shrink-0" />
+                      )}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-white text-xs font-bold">{comment.userName}</span>
+                          <span className="text-zinc-600 text-xs">{comment.createdAt?.toDate?.()?.toLocaleDateString("ko-KR")}</span>
+                          <button onClick={() => handleToggleLike(comment.id, isLiked ?? false)} className="flex items-center mx-2 gap-1 transition">
+                            <svg
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill={isLiked ? "#E63946" : "none"}
+                              stroke={isLiked ? "#E63946" : "#71717a"}
+                              strokeWidth="2"
+                            >
+                              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                            </svg>
+                            <span className={`text-xs ${isLiked ? "text-[#E63946]" : "text-zinc-500"}`}>{comment.likes ?? 0}</span>{" "}
                           </button>
-                        )}
+                          {/* 본인 댓글에만 삭제 버튼 표시 */}
+                          {user?.uid === comment.userId && (
+                            <button onClick={() => handleDeleteComment(comment.id)} className="text-zinc-600 mx-2 hover:text-red-500 text-xs transition">
+                              삭제
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-zinc-300 text-sm">{comment.content}</p>
                       </div>
-                      <p className="text-zinc-300 text-sm">{comment.content}</p>
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>

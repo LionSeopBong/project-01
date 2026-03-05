@@ -17,7 +17,8 @@ export default function WodCard({ wod, showDetail = true, isAdmin = false }: Wod
   const handleDelete = async () => {
     if (!confirm("WOD를 삭제할까요?")) return;
     await deleteWod(wod.id);
-    router.refresh();
+    // router.refresh();
+    window.location.reload();
   };
   return (
     <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800 space-y-6">
