@@ -121,7 +121,7 @@ export default function WodCard({ wod, showDetail = true, isAdmin = false }: Wod
         ) : (
           // WOD 페이지 → 댓글로 스크롤
           <button
-            onClick={() => document.getElementById("comments")?.scrollIntoView({ behavior: "smooth" })}
+            onClick={() => router.push(`/record/add?wodId=${wod.id}`)}
             className="w-full text-center text-sm font-bold text-zinc-400 hover:text-white tracking-widest uppercase transition"
           >
             ✅ Done

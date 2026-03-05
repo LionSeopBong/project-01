@@ -50,3 +50,18 @@ export interface WodComment {
   likedBy: string[]; // 좋아요 누른 유저 uid 배열
   createdAt: any;
 }
+
+export interface WorkoutRecord {
+  id: string;
+  wodType: string;
+  userId: string;
+  userName: string;
+  gender: string; // "male" | "female"
+  wodId: string;
+  wodName: string;
+  timeSeconds: number; // 기록 시간 (초)
+  reps: number; // 렙수
+  level: string; // "Beginner" | "Rxd" | "Athlete"
+  completedAt: string; // YYYY-MM-DD
+  createdAt: any;
+}

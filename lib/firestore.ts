@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase";
-import { User, Wod, WodComment } from "@/types/wod";
+import { User, Wod, WodComment, WorkoutRecord } from "@/types/wod";
 import {
   addDoc,
   arrayRemove,
@@ -110,4 +110,37 @@ export const toggleLike = async (commentId: string, userId: string, isLiked: boo
       likes: increment(1),
     });
   }
+};
+
+// 기록등록
+export const addWorkoutRecord = async (record: Omit<WorkoutRecord, "id">) => {
+  const ref = await addDoc(collection(db, "workoutRecords"), {
+    ...record,
+    createdAt: Timestamp.now(),
+  });
+  return ref.id;
+};
+// 내 기록 조회
+export const getMyRecords = async (userId: string): Promise<WorkoutRecord[]> => {
+  const q = query(collection(db, "workoutRecords"), where("userId", "==", userId), orderBy("completedAt", "desc"));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as unknown as WorkoutRecord[];
+};
+// 이달 출석 조회
+export const getMonthlyAttendance = async (userId: string, yearMonth: string): Promise<string[]> => {
+  // yearMonth: "2026-03"
+  const q = query(
+    collection(db, "workoutRecords"),
+    where("userId", "==", userId),
+    where("completedAt", ">=", `${yearMonth}-01`),
+    where("completedAt", "<=", `${yearMonth}-31`),
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((doc) => doc.data().completedAt as string);
+};
+// 리더보드 조회 (특정 날짜)
+export const getLeaderboard = async (date: string): Promise<WorkoutRecord[]> => {
+  const q = query(collection(db, "workoutRecords"), where("completedAt", "==", date), orderBy("reps", "desc"));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as unknown as WorkoutRecord[];
 };
