@@ -80,8 +80,16 @@ export default function WodCard({ wod, showDetail = true, isAdmin = false }: Wod
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-bold text-[#E63946] border border-[#E63946] px-2 py-0.5 rounded-full uppercase tracking-widest">{part.type}</span>
             {part.type === "Every" && part.interval && <span className="text-xs text-zinc-400">{part.interval}</span>}
-            {part.timeCap > 0 && <span className="text-xs text-zinc-500">Time Cap {Math.floor(part.timeCap / 60)}min</span>}
-            {part.rounds > 0 && part.type !== "Every" && <span className="text-xs text-zinc-500">{part.rounds} Rounds</span>}
+            {part.timeCap > 0 && (
+              <span className="text-xs text-zinc-500">
+                Time Cap <span className="text-[#E63946]">{Math.floor(part.timeCap / 60)}</span> min
+              </span>
+            )}
+            {part.rounds > 0 && part.type !== "Every" && (
+              <span className="text-xs text-zinc-500">
+                <span className="text-[#E63946]">{part.rounds}</span> Rounds
+              </span>
+            )}
           </div>
 
           {part.isLadder && (

@@ -17,8 +17,8 @@ const defaultMovement = (): Movement => ({
 });
 const defaultPart = (part: "A" | "B" | "C"): WodPart => ({
   part,
-  label: part === "A" ? "Strength" : "WOD",
-  type: part === "A" ? "Strength" : "AMRAP",
+  label: "",
+  type: "For Time",
   rounds: 1,
   timeCap: 0,
   interval: "",
