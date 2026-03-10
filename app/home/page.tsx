@@ -1,36 +1,24 @@
 "use client";
-import { useAuth } from "@/context/AuthContext";
-import { getTodayWod } from "@/lib/firestore";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import WodCard from "@/app/components/ui/WodCard";
-import { Wod } from "@/types/wod";
 import HomeHeader from "@/app/components/ui/HomeHeader";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { useWodData } from "@/hooks/useWodData";
+import { useEffect, useState } from "react";
+import { getLocalToday, getYearMonth } from "@/lib/utils";
+import { getMonthlyAttendance } from "@/lib/firestore";
+import { useCalendar } from "@/hooks/useCalendar";
+import AttendanceCalendar from "@/app/components/ui/AttendanceCalendar";
 
 export default function Home() {
-  const { user, loading } = useAuth();
   const router = useRouter();
-  const [wod, setWod] = useState<Wod | null>(null);
-  const [wodLoading, setWodLoading] = useState(true);
 
-  // 미로그인 시 리다이렉트
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/");
-    }
-  }, [user, loading]);
+  // 로그인 훅
+  const { user, loading } = useAuthGuard();
+  // wod 데이터 불러오기
+  const { wod, wodLoading } = useWodData();
 
-  // WOD 데이터 불러오기
-  useEffect(() => {
-    const fetchWod = async () => {
-      const data = await getTodayWod();
-      setWod(data);
-      setWodLoading(false);
-    };
-    fetchWod();
-  }, []);
-
-  if (loading) return <div className="min-h-screen bg[#0a0a0a]" />;
+  if (loading) return <div className="min-h-screen bg-[#0a0a0a]" />;
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] px-4 pt-10 pb-24">
@@ -52,6 +40,23 @@ export default function Home() {
           <div className="bg-zinc-900 rounded-2xl p-5 text-zinc-500 text-sm text-center">오늘의 WOD가 아직 등록되지 않았어요 😢</div>
         )}
       </section>
+      {/* 월간 출석 보드 */}
+      <section className="mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">This Month</h2>
+          <span className="text-xs text-zinc-500">{new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long" })}</span>
+        </div>
+        {user && <AttendanceCalendar userId={user.uid} />}
+      </section>
+      {/* 공지 카드 */}
+      {wod?.note && (
+        <section className="mt-6">
+          <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">📢 Notice</h2>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+            <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">{wod.note}</p>
+          </div>
+        </section>
+      )}
     </main>
   );
 }

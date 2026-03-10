@@ -1,4 +1,5 @@
 import { db } from "@/lib/firebase";
+import { getLocalToday } from "@/lib/utils";
 import { User, Wod, WodComment, WorkoutRecord } from "@/types/wod";
 import {
   addDoc,
@@ -20,21 +21,10 @@ import {
 
 //오늘 날짜 WOD 조회
 export const getTodayWod = async (): Promise<Wod | null> => {
-  // const today = new Date().toISOString().split("T")[0];
-  const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-
-  // console.log("오늘 날짜:", today);
-
+  const today = getLocalToday();
   const q = query(collection(db, "wods"), where("date", "==", today), limit(1));
 
   const snapshot = await getDocs(q);
-  // console.log("결과 개수:", snapshot.size);
-  // console.log(
-  //   "데이터:",
-  //   snapshot.docs.map((doc) => doc.data()),
-  // );
-
   if (snapshot.empty) return null;
 
   const doc = snapshot.docs[0];
@@ -126,9 +116,8 @@ export const getMyRecords = async (userId: string): Promise<WorkoutRecord[]> => 
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as unknown as WorkoutRecord[];
 };
-// 이달 출석 조회
+// 월별 출석 날짜 조회
 export const getMonthlyAttendance = async (userId: string, yearMonth: string): Promise<string[]> => {
-  // yearMonth: "2026-03"
   const q = query(
     collection(db, "workoutRecords"),
     where("userId", "==", userId),
@@ -138,9 +127,9 @@ export const getMonthlyAttendance = async (userId: string, yearMonth: string): P
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => doc.data().completedAt as string);
 };
-// 리더보드 조회 (특정 날짜)
+// 특정 날짜 + 타입별 리더보드 조회
 export const getLeaderboard = async (date: string): Promise<WorkoutRecord[]> => {
-  const q = query(collection(db, "workoutRecords"), where("completedAt", "==", date), orderBy("reps", "desc"));
+  const q = query(collection(db, "workoutRecords"), where("completedAt", "==", date));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as unknown as WorkoutRecord[];
 };

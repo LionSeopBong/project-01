@@ -6,7 +6,7 @@ import { deleteWod } from "@/lib/firestore";
 
 interface WodCardProps {
   wod: Wod;
-  showDetail?: boolean; // 홈에서 자세히 보기 버튼 표시 여부
+  showDetail?: boolean;
   isAdmin?: boolean;
 }
 
@@ -17,19 +17,18 @@ export default function WodCard({ wod, showDetail = true, isAdmin = false }: Wod
   const handleDelete = async () => {
     if (!confirm("WOD를 삭제할까요?")) return;
     await deleteWod(wod.id);
-    // router.refresh();
     window.location.reload();
   };
+
   return (
     <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800 space-y-6">
       {/* WOD 제목 */}
       <div className="flex items-start justify-between">
         <h2 className="text-2xl font-black text-white tracking-tight flex-1 pr-4">{wod.title}</h2>
 
-        {/* 관리자만 표시 */}
+        {/* 관리자 메뉴 */}
         {isAdmin && (
           <div className="relative">
-            {/* 점 3개 버튼 */}
             <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 hover:bg-zinc-800 rounded-lg transition">
               <svg width="20" height="5" viewBox="0 0 20 5" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -39,10 +38,8 @@ export default function WodCard({ wod, showDetail = true, isAdmin = false }: Wod
               </svg>
             </button>
 
-            {/* 드롭다운 메뉴 */}
             {menuOpen && (
               <>
-                {/* 외부 클릭 시 닫기 */}
                 <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
                 <div className="absolute right-0 top-8 bg-zinc-800 border border-zinc-700 rounded-xl overflow-hidden z-20 w-32 shadow-xl">
                   <button
@@ -69,43 +66,36 @@ export default function WodCard({ wod, showDetail = true, isAdmin = false }: Wod
           </div>
         )}
       </div>
+
       {/* 파트별 렌더링 */}
       {wod.parts.map((part, index) => (
         <div key={index} className="space-y-3">
+          {/* 파트명 + 타입 뱃지 */}
           <div className="flex items-center gap-2">
             <span className="text-sm font-black text-[#E63946]">{part.part}</span>
-            <span className="text-xs text-zinc-500 uppercase tracking-widest">{part.label}</span>
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-bold text-[#E63946] border border-[#E63946] px-2 py-0.5 rounded-full uppercase tracking-widest">{part.type}</span>
-            {part.type === "Every" && part.interval && <span className="text-xs text-zinc-400">{part.interval}</span>}
-            {part.timeCap > 0 && (
-              <span className="text-xs text-zinc-500">
-                Time Cap <span className="text-[#E63946]">{Math.floor(part.timeCap / 60)}</span> min
-              </span>
-            )}
-            {part.rounds > 0 && part.type !== "Every" && (
-              <span className="text-xs text-zinc-500">
-                <span className="text-[#E63946]">{part.rounds}</span> Rounds
-              </span>
-            )}
           </div>
-
-          {part.isLadder && (
-            <p className="text-xs text-zinc-400">{Array.from({ length: 4 }, (_, i) => part.ladderStart + i * part.ladderIncrement).join(" - ")} - - -</p>
+          {/* 무게 */}
+          {part.weights && part.weights.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {part.weights.map((w, i) => (
+                <div key={i} className="flex items-center gap-1.5">
+                  <span className="text-xs text-zinc-400">{w.tool}</span>
+                  <span className="text-xs bg-blue-950 text-blue-300 border border-blue-700 px-2 py-0.5 rounded-full">
+                    {w.maleWeight}
+                    {w.unit}
+                  </span>
+                  <span className="text-xs text-zinc-500">/</span>
+                  <span className="text-xs bg-pink-950 text-pink-300 border border-pink-700 px-2 py-0.5 rounded-full">
+                    {w.femaleWeight}
+                    {w.unit}
+                  </span>
+                </div>
+              ))}
+            </div>
           )}
-
-          <ul className="space-y-2">
-            {part.movements.map((movement, movIndex) => (
-              <li key={movIndex} className="flex items-center gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#E63946] shrink-0" />
-                <span className="text-white text-sm font-medium">
-                  {movement.distance > 0 ? `${movement.distance}${movement.unit} ${movement.name}` : `${movement.reps} ${movement.name}`}
-                </span>
-              </li>
-            ))}
-          </ul>
+          {/* 파트 메모 */}
+          {part.note && <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">{part.note}</p>}
 
           {index < wod.parts.length - 1 && <div className="border-t border-zinc-800 pt-2" />}
         </div>
@@ -114,7 +104,7 @@ export default function WodCard({ wod, showDetail = true, isAdmin = false }: Wod
       {/* 전체 메모 */}
       {wod.note && (
         <div className="bg-zinc-800 rounded-xl p-4">
-          <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">📝 공지</p>
+          <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">📝</p>
           <p className="text-sm text-zinc-300">{wod.note}</p>
         </div>
       )}
@@ -122,12 +112,10 @@ export default function WodCard({ wod, showDetail = true, isAdmin = false }: Wod
       {/* 하단 버튼 */}
       <div className="pt-4 border-t border-zinc-800">
         {showDetail ? (
-          // 홈 → 자세히 보기
           <Link href="/wod" className="block text-center text-sm font-bold text-[#E63946] tracking-widest uppercase">
             자세히 보기 →
           </Link>
         ) : (
-          // WOD 페이지 → 댓글로 스크롤
           <button
             onClick={() => router.push(`/record/add?wodId=${wod.id}`)}
             className="w-full text-center text-sm font-bold text-zinc-400 hover:text-white tracking-widest uppercase transition"

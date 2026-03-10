@@ -3,12 +3,25 @@ export interface Movement {
   reps: number;
   distance: number;
   unit: string;
+  noReps: boolean;
 }
-
+// 관리자가 파트별로 설정하는 기록 폼 스펙
+export interface RecordConfig {
+  enabled: boolean; // 이 파트 기록 받을지 여부
+  fields: {
+    finishTime: boolean; // 완료 시간 (For Time)
+    weight: boolean; // 무게 (Strength / Every)
+    rounds: boolean; // 라운드 + 렙수 (AMRAP)
+    isCompleted: boolean; // 완주 여부
+    isDNF: boolean; // Did Not Finish
+    memo: boolean; // 자유 메모
+  };
+}
 export interface WodPart {
   part: "A" | "B" | "C";
   label: string;
   type: string; // AMRAP / For Time / EMOM / Every / Strength
+  recordType: string; // "For Time" | "EMOM" | "AMRAP" | "none"
   rounds: number;
   timeCap: number;
   interval: string; // Every 1:30 같은 인터벌
@@ -17,6 +30,9 @@ export interface WodPart {
   isLadder: boolean; // 3-6-9 ladder 여부
   ladderStart: number; // 시작 렙수
   ladderIncrement: number; // 증가 단위
+  noRounds: boolean;
+  noTimeCap: boolean;
+  weights: WodWeight[];
 }
 export interface Wod {
   id: string;
@@ -63,44 +79,34 @@ export interface WorkoutRecord {
   gender: string;
   wodId: string;
   wodName: string;
-  wodType: string; // "For Time" | "AMRAP" | "EMOM" | "Every" | "Strength"
+  wodPart: string; // "A" | "B" | "C"
+  recordType: string; // "For Time" | "EMOM" | "AMRAP"
   level: string; // "Beginner" | "Rxd" | "Athlete"
   completedAt: string; // YYYY-MM-DD
-  wodPart: string; // A,B,C Part
 
-  // 팀 WOD (공통 옵션)
+  // For Time
+  finishTime: number; // 완료 시간 (초)
+  weight: number; // 진행 무게 (kg)
+
+  // EMOM
+  failedRounds: number; // 실패 라운드 수
+  emomWeight: number; // 진행 무게 (kg)
+
+  // AMRAP
+  reps: number; // 최대 Reps
+  amrapWeight: number; // 진행 무게 (kg)
+
+  // 팀 WOD
   isTeam: boolean;
   partnerName: string;
   partnerWeight: number;
-  partnerDifferentWeight: boolean; // 파트너 무게 다를 때 체크
-
-  // For Time
-  timeCap: number; // 제한 시간 (초) - 불러오기
-  finishTime: number; // 완료 시간 (초)
-  weight: number; // 진행 무게
-  isDNF: boolean; // Did Not Finish
-  rounds: number; // 완료 라운드
-  reps: number; // 완료 렙수
-  maxCal: number; // Max Cal
-  maxReps: number; // Max Reps
-
-  // EMOM
-  // timeCap 공통 사용
-  failedRounds: number; // 실패 라운드 수
-
-  // Every
-  interval: number; // 몇 분마다 (초)
-  totalSets: number; // 총 세트수
-  sets: EverySet[]; // 세트별 무게/횟수
-
-  // AMRAP
-  // timeCap 공통 사용
-  isCompleted: boolean; // 완주 여부
-  completedTime: number; // 완주 시간 (초)
-  // rounds, reps 공통 사용
-  amrapRounds: number; // ← 추가
-  amrapReps: number; // ← 추가
-  amrapWeight: number; // 진행 무게
+  partnerDifferentWeight: boolean;
 
   createdAt: any;
+}
+export interface WodWeight {
+  tool: string; // "Barbell" | "Dumbbell" | "Kettlebell" | "Other"
+  maleWeight: number;
+  femaleWeight: number;
+  unit: string; // "kg" | "lb"
 }
