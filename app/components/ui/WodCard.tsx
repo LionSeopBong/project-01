@@ -74,6 +74,11 @@ export default function WodCard({ wod, showDetail = true, isAdmin = false }: Wod
           <div className="flex items-center gap-2">
             <span className="text-sm font-black text-[#E63946]">{part.part}</span>
             <span className="text-xs font-bold text-[#E63946] border border-[#E63946] px-2 py-0.5 rounded-full uppercase tracking-widest">{part.type}</span>
+            {part.isTeam && (
+              <span className="text-xs font-bold text-[#E63946] border border-[#E63946] px-2 py-0.5 rounded-full uppercase tracking-widest">
+                team of {part.teamSize}
+              </span>
+            )}
           </div>
           {/* 무게 */}
           {part.weights && part.weights.length > 0 && (

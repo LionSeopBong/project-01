@@ -1,19 +1,19 @@
 "use client";
 
-import { forwardRef, useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getWodByDate, getComments, addComment, deleteComments, getUser, toggleLike } from "@/lib/firestore";
 import WodCard from "@/app/components/ui/WodCard";
 import HomeHeader from "@/app/components/ui/HomeHeader";
-import { Wod, WodComment } from "@/types/wod";
-import { Timestamp } from "firebase/firestore";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { useWodByDate } from "@/hooks/useWodByDate";
+import { useComments } from "@/hooks/useComments";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import ReactDatePicker from "react-datepicker";
-import { ko } from "date-fns/locale"; // 한국어 로케일
+import { ko } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 
-// 날짜 포맷 유틸
-const formatDate = (date: Date) => date.toISOString().split("T")[0];
+const formatDate = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
 const addDays = (date: Date, days: number) => {
   const d = new Date(date);
   d.setDate(d.getDate() + days);
@@ -21,90 +21,27 @@ const addDays = (date: Date, days: number) => {
 };
 
 export default function WodPage() {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuthGuard();
   const router = useRouter();
 
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [wod, setWod] = useState<Wod | null>(null);
-  const [wodLoading, setWodLoading] = useState(true);
-  const [comments, setComments] = useState<WodComment[]>([]);
-  const [commentText, setCommentText] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-
   const today = new Date();
   const isToday = formatDate(currentDate) === formatDate(today);
 
-  // 미로그인 시 리다이렉트
+  const { wod, wodLoading } = useWodByDate(currentDate);
+  const { isAdmin } = useIsAdmin(user?.uid);
+  const { comments, commentText, setCommentText, submitting, fetchComments, handleAddComment, handleDeleteComment, handleToggleLike } = useComments(
+    wod?.id,
+    user?.uid,
+  );
+
+  // wod 변경시 댓글 불러오기
   useEffect(() => {
-    if (!loading && !user) router.push("/");
-  }, [user, loading]);
+    if (wod) fetchComments(wod.id);
+  }, [wod]);
 
-  // 날짜 변경시 WOD 불러오기
-  useEffect(() => {
-    const fetchWod = async () => {
-      setWodLoading(true);
-      setComments([]);
-      setWod(null);
-      const data = await getWodByDate(formatDate(currentDate));
-      setWod(data);
-      setWodLoading(false);
+  if (loading) return <div className="min-h-screen bg-[#0a0a0a]" />;
 
-      // 댓글 불러오기
-      if (data) {
-        const commentData = await getComments(data.id);
-        setComments(commentData);
-      }
-    };
-    fetchWod();
-  }, [currentDate]);
-
-  // 댓글 등록
-  const handleAddComment = async () => {
-    if (!commentText.trim() || !wod || !user) return;
-    setSubmitting(true);
-    try {
-      await addComment({
-        wodId: wod.id,
-        userId: user.uid,
-        userName: user.displayName ?? "익명",
-        profileImage: user.photoURL ?? "",
-        content: commentText.trim(),
-        likes: 0,
-        likedBy: [],
-        createdAt: Timestamp.now(),
-      });
-      setCommentText("");
-      // 댓글 새로고침
-      const updated = await getComments(wod.id);
-      setComments(updated);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-  //댓글 삭제
-  const handleDeleteComment = async (commentID: string) => {
-    if (!confirm("댓글을 삭제할까요?")) return;
-    await deleteComments(commentID);
-    const updated = await getComments(wod!.id);
-    setComments(updated);
-  };
-  // 댓글 좋아요
-  const handleToggleLike = async (commentId: string, isLiked: boolean) => {
-    if (!user || !wod) return;
-    toggleLike(commentId, user.uid, isLiked);
-    const updated = await getComments(wod?.id);
-    setComments(updated);
-  };
-
-  useEffect(() => {
-    const checkAdmin = async () => {
-      if (!user) return;
-      const userData = await getUser(user.uid);
-      setIsAdmin(userData?.role === "admin");
-    };
-    checkAdmin();
-  }, [user]);
   return (
     <main className="min-h-screen bg-[#0a0a0a] pb-24">
       <HomeHeader />
@@ -112,7 +49,6 @@ export default function WodPage() {
       <div className="px-4">
         {/* 날짜 네비게이션 */}
         <div className="flex items-center justify-between mb-6">
-          {/* Prev */}
           <button
             onClick={() => setCurrentDate(addDays(currentDate, -1))}
             className="flex items-center gap-1 text-zinc-400 hover:text-white transition text-sm font-bold"
@@ -120,16 +56,13 @@ export default function WodPage() {
             ← Prev
           </button>
 
-          {/* 현재 날짜 */}
-
-          {/* 날짜 클릭 → DatePicker */}
           <ReactDatePicker
             selected={currentDate}
             onChange={(date: Date | null) => {
               if (date) setCurrentDate(date);
             }}
-            maxDate={today} // 오늘 이후 선택 불가
-            locale={ko} // 한국어
+            maxDate={today}
+            locale={ko}
             dateFormat="yyyy.MM.dd"
             customInput={
               <button className="text-center">
@@ -145,7 +78,6 @@ export default function WodPage() {
             }
           />
 
-          {/* Next - 오늘이면 비활성 */}
           <button
             onClick={() => !isToday && setCurrentDate(addDays(currentDate, 1))}
             className={`flex items-center gap-1 text-sm font-bold transition ${
@@ -159,7 +91,6 @@ export default function WodPage() {
         {/* WOD 카드 */}
         <section>
           <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">{isToday ? "Today's WOD" : formatDate(currentDate)}</h2>
-
           {wodLoading ? (
             <div className="bg-zinc-900 rounded-2xl h-48 animate-pulse" />
           ) : wod && wod.parts ? (
@@ -181,12 +112,12 @@ export default function WodPage() {
                 <input
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
+                  onKeyDown={(e) => e.key === "Enter" && handleAddComment(user?.displayName ?? "익명", user?.photoURL ?? "")}
                   placeholder="오늘 WOD 어떠셨나요?"
                   className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-[#E63946]"
                 />
                 <button
-                  onClick={handleAddComment}
+                  onClick={() => handleAddComment(user?.displayName ?? "익명", user?.photoURL ?? "")}
                   disabled={submitting || !commentText.trim()}
                   className="px-4 py-2.5 bg-[#E63946] rounded-xl text-white text-sm font-bold disabled:opacity-50 transition"
                 >
@@ -224,9 +155,8 @@ export default function WodPage() {
                             >
                               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                             </svg>
-                            <span className={`text-xs ${isLiked ? "text-[#E63946]" : "text-zinc-500"}`}>{comment.likes ?? 0}</span>{" "}
+                            <span className={`text-xs ${isLiked ? "text-[#E63946]" : "text-zinc-500"}`}>{comment.likes ?? 0}</span>
                           </button>
-                          {/* 본인 댓글에만 삭제 버튼 표시 */}
                           {user?.uid === comment.userId && (
                             <button onClick={() => handleDeleteComment(comment.id)} className="text-zinc-600 mx-2 hover:text-red-500 text-xs transition">
                               삭제

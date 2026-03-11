@@ -9,23 +9,19 @@ import { useAdminGuard } from "@/hooks/useAdminGuard";
 
 const PART_LABELS = ["A", "B", "C"] as const;
 const WOD_TYPES = ["For Time", "AMRAP", "EMOM", "Every", "Strength", "Accessory"];
-
 const defaultPart = (part: "A" | "B" | "C"): WodPart => ({
   part,
   label: "",
   type: "For Time",
-  recordType: "none",
   rounds: 0,
   timeCap: 0,
-  interval: "",
   movements: [],
-  isLadder: false,
-  ladderStart: 0,
-  ladderIncrement: 0,
   note: "",
   noRounds: false,
   noTimeCap: false,
   weights: [],
+  isTeam: false,
+  teamSize: 2,
 });
 
 export default function AdminWodPage() {
@@ -148,6 +144,7 @@ export default function AdminWodPage() {
                 ))}
               </div>
             </div>
+
             {/* 무게 항목 */}
             <div>
               <label className="text-xs text-zinc-500 uppercase tracking-widest mb-3 block">무게</label>
@@ -237,9 +234,43 @@ export default function AdminWodPage() {
                 + 무게 추가
               </button>
             </div>
-            {/* 파트 메모 */}
+            {/* 팀 설정 */}
             <div>
-              <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">메모</label>
+              <div className="flex items-center gap-3 mb-3">
+                <input
+                  type="checkbox"
+                  id={`team-${partIndex}`}
+                  checked={part.isTeam}
+                  onChange={(e) => updatePart(partIndex, "isTeam", e.target.checked)}
+                  className="accent-[#E63946]"
+                />
+                <label htmlFor={`team-${partIndex}`} className="text-sm text-zinc-400">
+                  팀 WOD
+                </label>
+              </div>
+
+              {part.isTeam && (
+                <div>
+                  <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">팀 인원수</label>
+                  <div className="flex gap-2">
+                    {[2, 3, 4].map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => updatePart(partIndex, "teamSize", size)}
+                        className={`px-5 py-2 rounded-xl text-sm font-bold border transition ${
+                          part.teamSize === size ? "bg-[#E63946] border-[#E63946] text-white" : "bg-zinc-800 border-zinc-700 text-zinc-400"
+                        }`}
+                      >
+                        {size}인
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* 와드 설명 */}
+            <div>
+              <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">WOD</label>
               <textarea
                 value={part.note}
                 onChange={(e) => updatePart(partIndex, "note", e.target.value)}
