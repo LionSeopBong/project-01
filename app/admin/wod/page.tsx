@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { createWod } from "@/lib/firestore";
 import { WodPart } from "@/types/wod";
-import { useAdminGuard } from "@/hooks/useAdminGuard";
+import { useAdminGuard } from "@/hooks/auth/useAdminGuard";
 
 const PART_LABELS = ["A", "B", "C"] as const;
 const WOD_TYPES = ["For Time", "AMRAP", "EMOM", "Every", "Strength", "Accessory"];
@@ -36,7 +36,9 @@ export default function AdminWodPage() {
   const [date, setDate] = useState("");
   const [note, setNote] = useState("");
   const [title, setTitle] = useState("");
+
   const [parts, setParts] = useState<WodPart[]>([defaultPart("A")]);
+
   const [submitting, setSubmitting] = useState(false);
 
   // 파트 추가

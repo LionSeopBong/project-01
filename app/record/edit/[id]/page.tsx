@@ -5,27 +5,41 @@ import { useAuthGuard } from "@/hooks/auth/useAuthGuard";
 import { useRecordForm } from "@/hooks/record/useRecordForm";
 import { useWod } from "@/hooks/wod/useWod";
 import { LEVELS } from "@/lib/constants";
+import { getWorkoutRecord } from "@/lib/firestore";
+import { WorkoutRecord } from "@/types/wod";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-
-export default function AddRecordPage() {
-  const router = useRouter();
-
+export default function MyRecordsEdit() {
   const { user, loading } = useAuthGuard();
-  const searchParams = useSearchParams();
-  const wodId = searchParams.get("wodId");
-  const { wod, wodLoading } = useWod(wodId ?? "");
-  const { selectedPart, recordPart, setRecordPart, finishMin, setFinishMin, finishSec, setFinishSec, submitting, currentPart, handlePartChange, handleSubmit } =
-    useRecordForm(wod || null);
+  const params = useParams();
+  const recordId = params.id as string;
+  const [recordData, setRecordData] = useState<WorkoutRecord | null>(null);
 
   useEffect(() => {
-    if (wod) {
-      handlePartChange(wod.parts[0].part);
-    }
-  }, [wod]);
+    if (!recordId) return;
+    getWorkoutRecord(recordId).then((data) => {
+      if (data) setRecordData(data);
+    });
+  }, [recordId]);
 
-  if (loading || wodLoading) return <div className="min-h-screen bg-[#0a0a0a]" />;
+  const { wod, wodLoading } = useWod(recordData?.wodId ?? "");
+  const {
+    selectedPart,
+    recordPart,
+    setRecordPart,
+    finishMin,
+    setFinishMin,
+    finishSec,
+    setFinishSec,
+    submitting,
+    currentPart,
+    handlePartChange,
+
+    handleUpdate,
+  } = useRecordForm(wod ?? null, recordData ?? undefined);
+
+  if (loading || wodLoading || !recordData) return <div className="min-h-screen bg-[#0a0a0a]" />;
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] px-4 pb-24">
@@ -33,7 +47,7 @@ export default function AddRecordPage() {
       {/* 헤더 */}
       <div className="mb-6">
         <h1 className="text-2xl font-black text-white">
-          <span className="text-[#E63946]">Record Form</span>
+          <span className="text-[#E63946]">Record Edit</span>
         </h1>
         <h2 className="text-2xl font-black text-white tracking-tight flex-1 pr-4">{wod?.title}</h2>
       </div>
@@ -44,7 +58,7 @@ export default function AddRecordPage() {
             key={part.part}
             onClick={() => handlePartChange(part.part)}
             className={`px-5 py-2 rounded-xl text-sm font-black border transition 
-              ${selectedPart === part.part ? "bg-[#E63946] border-[#E63946] text-white" : "bg-zinc-800 border-zinc-700 text-zinc-400"}`}
+                ${selectedPart === part.part ? "bg-[#E63946] border-[#E63946] text-white" : "bg-zinc-800 border-zinc-700 text-zinc-400"}`}
           >
             {part.part}
           </button>
@@ -59,7 +73,7 @@ export default function AddRecordPage() {
               key={l}
               onClick={() => setRecordPart({ ...recordPart, level: l })}
               className={`px-2 py-2 rounded-xl text-sm font-black border transition 
-              ${recordPart.level === l ? "bg-[#E63946] border-[#E63946] text-white" : "bg-zinc-800 border-zinc-700 text-zinc-400"}`}
+                ${recordPart.level === l ? "bg-[#E63946] border-[#E63946] text-white" : "bg-zinc-800 border-zinc-700 text-zinc-400"}`}
             >
               {l}
             </button>
@@ -417,11 +431,11 @@ export default function AddRecordPage() {
 
       {/*  제출 버튼 */}
       <button
-        onClick={() => handleSubmit(user?.uid ?? "", user?.displayName ?? "")}
+        onClick={() => handleUpdate(recordId, user?.uid ?? "", user?.displayName ?? "")}
         disabled={submitting}
         className="w-full py-4 mt-3 bg-[#E63946] rounded-xl text-white font-black text-lg tracking-wider uppercase disabled:opacity-50 transition"
       >
-        {submitting ? "제출 중" : "Submit"}
+        {submitting ? "제출 중" : "update"}
       </button>
     </main>
   );

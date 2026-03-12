@@ -2,10 +2,10 @@
 import { useRouter } from "next/navigation";
 import WodCard from "@/app/components/ui/WodCard";
 import HomeHeader from "@/app/components/ui/HomeHeader";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
-import { useWodData } from "@/hooks/useWodData";
+import { useAuthGuard } from "@/hooks/auth/useAuthGuard";
+import { useTodayWod } from "@/hooks/wod/useTodayWod";
 import AttendanceCalendar from "@/app/components/ui/AttendanceCalendar";
-import { useDate } from "@/hooks/useDate";
+import { useDate } from "@/hooks/user/useDate";
 
 export default function Home() {
   const router = useRouter();
@@ -13,7 +13,7 @@ export default function Home() {
   // 로그인 훅
   const { user, loading } = useAuthGuard();
   // wod 데이터 불러오기
-  const { wod, wodLoading } = useWodData();
+  const { wod, wodLoading } = useTodayWod();
   // 오늘 날짜 불러오기
   const { dateStr } = useDate();
 

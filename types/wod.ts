@@ -59,7 +59,7 @@ export interface WodWeight {
   femaleWeight: number;
   unit: string; // "kg" | "lb"
 }
-export type RecordLevel = "Beginner" | "Scale" | "Rxd" | "Athlete";
+export type RecordLevel = "Beginner" | "Scale" | "R'xd" | "Athlete";
 export interface RecordWeight {
   tool: string; // 사용 도구
   weight: number; // 무게 숫자
@@ -71,7 +71,7 @@ export interface WorkoutRecord {
   id: string;
   userId: string;
   userName: string;
-  gender: string;
+  gender?: string;
   wodId: string;
   wodName: string;
   wodPart: string; // "A" | "B" | "C"
@@ -90,7 +90,7 @@ export interface WorkoutRecord {
 
   // EMOM
   failCount?: number; // 실패 횟수
-  emomType?: "reps" | "fail"; // 제출 방식
+  // 총합 랩수도 사용할떄 있음
 
   // AMRAP
   reps?: number; // 최대 Reps
@@ -102,6 +102,9 @@ export interface WorkoutRecord {
   partnerName: string;
   partnerWeight: number;
   partnerDifferentWeight: boolean;
+
+  // Every
+  memo?: string;
 
   createdAt: any;
 }

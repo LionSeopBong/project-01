@@ -2,7 +2,7 @@ import { getTodayWod } from "@/lib/firestore";
 import { Wod } from "@/types/wod";
 import { useEffect, useState } from "react";
 
-export const useWodData = () => {
+export const useTodayWod = () => {
   const [wod, setWod] = useState<Wod | null>(null);
   const [wodLoading, setWodLoading] = useState(true);
 

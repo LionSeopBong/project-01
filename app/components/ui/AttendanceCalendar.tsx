@@ -1,4 +1,4 @@
-import { useCalendar } from "@/hooks/useCalendar";
+import { useCalendar } from "@/hooks/user/useCalendar";
 import { getLocalToday } from "@/lib/utils";
 
 export default function AttendanceCalendar({ userId }: { userId: string }) {

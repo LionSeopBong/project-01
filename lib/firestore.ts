@@ -133,3 +133,20 @@ export const getLeaderboard = async (date: string): Promise<WorkoutRecord[]> => 
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as unknown as WorkoutRecord[];
 };
+// 나의 오늘 기록 삭제
+export const deleteWorkoutRecord = async (id: string) => {
+  await deleteDoc(doc(db, "workoutRecords", id));
+};
+// 레코드 페이지 한개 기록 조회
+export const getWorkoutRecord = async (id: string): Promise<WorkoutRecord | null> => {
+  const docRef = doc(db, "workoutRecords", id);
+  const docSnap = await getDoc(docRef);
+  if (!docSnap.exists()) return null;
+  return { id: docSnap.id, ...docSnap.data() } as WorkoutRecord;
+};
+
+// 기록 수정
+export const updateWorkoutRecord = async (id: string, record: Partial<WorkoutRecord>) => {
+  const docRef = doc(db, "workoutRecords", id);
+  await updateDoc(docRef, record);
+};

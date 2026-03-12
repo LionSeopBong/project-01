@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { updateWod } from "@/lib/firestore";
 import { WodPart } from "@/types/wod";
-import { useAdminGuard } from "@/hooks/useAdminGuard";
-import { useWod } from "@/hooks/useWod";
+import { useAdminGuard } from "@/hooks/auth/useAdminGuard";
+import { useWod } from "@/hooks/wod/useWod";
 
 const WOD_TYPES = ["For Time", "AMRAP", "EMOM", "Every", "Strength", "Accessory"];
 
