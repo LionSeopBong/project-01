@@ -1,7 +1,7 @@
 import { useCalendar } from "@/hooks/user/useCalendar";
 import { getLocalToday } from "@/lib/utils";
 
-export default function AttendanceCalendar({ userId }: { userId: string }) {
+export default function AttendanceCalendar({ userId, onDateClick }: { userId: string; onDateClick?: (date: string) => void }) {
   const { attendance } = useCalendar(userId);
 
   const now = new Date();
@@ -24,12 +24,10 @@ export default function AttendanceCalendar({ userId }: { userId: string }) {
 
       {/* 날짜 그리드 */}
       <div className="grid grid-cols-7 gap-y-1">
-        {/* 빈 칸 */}
         {Array.from({ length: firstDay }).map((_, i) => (
           <div key={`empty-${i}`} />
         ))}
 
-        {/* 날짜 */}
         {Array.from({ length: daysInMonth }).map((_, i) => {
           const d = i + 1;
           const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
@@ -39,11 +37,12 @@ export default function AttendanceCalendar({ userId }: { userId: string }) {
           return (
             <div key={d} className="flex items-center justify-center">
               <div
-                className={`w-8 h-8 flex items-center justify-center rounded-md text-xs font-bold transition
-                ${isAttended ? "bg-[#E63946] text-white" : ""}
-                ${isToday && !isAttended ? "border border-[#E63946] text-[#E63946]" : ""}
-                ${!isAttended && !isToday ? "text-zinc-600" : ""}
-              `}
+                onClick={() => onDateClick?.(dateStr)}
+                className={`w-8 h-8 flex items-center justify-center rounded-md text-xs font-bold transition cursor-pointer
+                  ${isAttended ? "bg-[#E63946] text-white" : ""}
+                  ${isToday && !isAttended ? "border border-[#E63946] text-[#E63946]" : ""}
+                  ${!isAttended && !isToday ? "text-zinc-600" : ""}
+                `}
               >
                 {d}
               </div>

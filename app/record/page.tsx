@@ -5,30 +5,13 @@ import HomeHeader from "@/app/components/ui/HomeHeader";
 import { useAuthGuard } from "@/hooks/auth/useAuthGuard";
 import { useDate } from "@/hooks/user/useDate";
 import { useMyRecords } from "@/hooks/record/useMyRecords";
-import { useTodayWod } from "@/hooks/wod/useTodayWod";
 import { deleteWorkoutRecord } from "@/lib/firestore";
 import { getLocalToday } from "@/lib/utils";
-import { WorkoutRecord } from "@/types/wod";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-
-const getResultText = (record: WorkoutRecord) => {
-  switch (record.wodType) {
-    case "For Time":
-      if (record.isDNF) return `DNF · ${record.rounds ?? 0}R ${record.reps ?? 0}reps`;
-      const min = Math.floor((record.finishTime ?? 0) / 60);
-      const sec = (record.finishTime ?? 0) % 60;
-      return `${min}:${String(sec).padStart(2, "0")}`;
-    case "AMRAP":
-      if (record.hasTotalRepsOnly) return `${record.totalReps ?? 0} reps`;
-      return `${record.rounds ?? 0}R ${record.reps ?? 0}reps`;
-    case "EMOM":
-      if (record.hasTotalRepsOnly) return `${record.totalReps ?? 0} reps`;
-      return `Fail ${record.failCount ?? 0}`;
-    default:
-      return record.memo ?? "-";
-  }
-};
+import { useWodByDate } from "@/hooks/wod/useWodByDate";
+import { useLeaderboard } from "@/hooks/record/useLeaderBoard";
+import { getResultText, getSortedRecords } from "@/lib/utils";
 
 export default function RecordPage() {
   // 로그인 확인
@@ -38,15 +21,16 @@ export default function RecordPage() {
 
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"my" | "leaderboard">("my");
-
+  const [selectedDate, setSelectedDate] = useState(getLocalToday());
   //나의 기록 불러오기
   const { myRecords, recordsLoading, refetch } = useMyRecords(user?.uid ?? "");
-  // const todayRecords = myRecords.filter((record) => record.completedAt === getLocalToday() && record.wodId === todayWod?.id);
-  const { wod: todayWod } = useTodayWod();
+  const { wod: selectedWod } = useWodByDate(selectedDate);
   const todayRecords = useMemo(() => {
-    if (!todayWod) return [];
-    return myRecords.filter((record) => record.completedAt === getLocalToday() && record.wodId === todayWod.id);
-  }, [myRecords, todayWod]);
+    return myRecords.filter((record) => record.completedAt === selectedDate);
+  }, [myRecords, selectedDate]);
+  // 리더보드 state
+  const [selectedPart, setSelectedPart] = useState("A");
+  const { leaderboard, leaderboardLoading } = useLeaderboard(selectedDate);
 
   if (loading) return <div className="min-h-screen bg-[#0a0a0a]" />;
 
@@ -66,10 +50,10 @@ export default function RecordPage() {
           <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">이번 달</h2>
           <span className="text-xs text-zinc-500">{new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long" })}</span>
         </div>
-        {user && <AttendanceCalendar userId={user.uid} />}
+        {user && <AttendanceCalendar userId={user.uid} onDateClick={(date) => setSelectedDate(date)} />}
       </section>
       {/* 탭 */}
-      <div className="flex gap-2 mt-3">
+      <div className="flex gap-2 mt-3 mb-3">
         {[
           { key: "my", label: "내 기록" },
           { key: "leaderboard", label: "리더보드" },
@@ -89,7 +73,20 @@ export default function RecordPage() {
       {activeTab === "my" && (
         <div className="space-y-3">
           {recordsLoading && <div className="text-zinc-500 text-sm text-center py-10">불러오는 중...</div>}
-          {!recordsLoading && todayRecords.length === 0 && <div className="text-zinc-500 text-sm text-center py-10">기록이 없어요</div>}
+          {!recordsLoading && todayRecords.length === 0 && (
+            <div className="text-center py-10 space-y-3">
+              <p className="text-zinc-500 text-sm">기록이 없어요</p>
+              <button
+                onClick={() => {
+                  if (selectedWod) router.push(`/record/add?wodId=${selectedWod.id}`);
+                }}
+                className="px-4 py-2 bg-[#E63946] rounded-xl text-white text-sm font-black"
+              >
+                + 기록 추가
+              </button>
+            </div>
+          )}
+
           {todayRecords.map((record) => (
             <div key={record.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 space-y-2">
               {/* 날짜 + 와드명 */}
@@ -139,7 +136,71 @@ export default function RecordPage() {
         </div>
       )}{" "}
       {/* 리더보드 탭 */}
-      {activeTab === "leaderboard" && <div>리더보드</div>}
+      {activeTab === "leaderboard" && (
+        <div className="space-y-4">
+          {/* 파트 선택 */}
+          <div className="flex gap-2">
+            {selectedWod?.parts.map((part) => (
+              <button
+                key={part.part}
+                onClick={() => setSelectedPart(part.part)}
+                className={`px-5 py-2 rounded-xl text-sm font-black border transition ${
+                  selectedPart === part.part ? "bg-[#E63946] border-[#E63946] text-white" : "bg-zinc-800 border-zinc-700 text-zinc-400"
+                }`}
+              >
+                {part.part}
+              </button>
+            ))}
+          </div>
+
+          {leaderboardLoading && <div className="text-zinc-500 text-sm text-center py-10">불러오는 중...</div>}
+
+          {/* 레벨별 섹션 */}
+          {(["Athlete", "R'xd", "Scale", "Beginner"] as const).map((level) => {
+            const levelRecords = getSortedRecords(leaderboard.filter((r) => r.wodPart === selectedPart && r.level === level && !r.isDNF));
+            const dnfRecords = leaderboard.filter((r) => r.wodPart === selectedPart && r.level === level && r.isDNF);
+            const allRecords = [...levelRecords, ...dnfRecords];
+            if (allRecords.length === 0) return null;
+
+            return (
+              <div key={level}>
+                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">{level}</h3>
+                <div className="space-y-2">
+                  {allRecords.map((record, index) => (
+                    <div key={record.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3 flex items-center gap-3">
+                      {/* 순위 */}
+                      <span
+                        className={`text-sm font-black w-6 text-center ${
+                          index === 0 && !record.isDNF
+                            ? "text-yellow-400"
+                            : index === 1 && !record.isDNF
+                              ? "text-zinc-300"
+                              : index === 2 && !record.isDNF
+                                ? "text-amber-600"
+                                : "text-zinc-600"
+                        }`}
+                      >
+                        {record.isDNF ? "-" : index + 1}
+                      </span>
+
+                      {/* 이름 */}
+                      <span className="text-white font-bold text-sm flex-1">{record.userName}</span>
+
+                      {/* 결과 */}
+                      {}
+                      <span className={`text-sm font-black ${record.isDNF ? "text-zinc-600" : "text-white"}`}>{getResultText(record)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+          {!leaderboardLoading && leaderboard.filter((r) => r.wodPart === selectedPart).length === 0 && (
+            <div className="text-zinc-500 text-sm text-center py-10">기록이 없어요</div>
+          )}
+        </div>
+      )}
     </main>
   );
 }

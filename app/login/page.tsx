@@ -1,5 +1,6 @@
 "use client";
 import { signInWithGoogle } from "@/lib/auth";
+import { getUser } from "@/lib/firestore";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -8,8 +9,10 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const { isNewUser } = await signInWithGoogle();
-      if (isNewUser) {
+      const { user, isNewUser } = await signInWithGoogle();
+      const userInfo = await getUser(user.uid); // ← Firestore 에서 확인
+
+      if (isNewUser || !userInfo) {
         router.push("/onboarding/profile");
       } else {
         router.push("/home");

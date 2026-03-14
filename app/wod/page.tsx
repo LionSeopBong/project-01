@@ -28,7 +28,7 @@ export default function WodPage() {
   const today = new Date();
   const isToday = formatDate(currentDate) === formatDate(today);
 
-  const { wod, wodLoading } = useWodByDate(currentDate);
+  const { wod, wodLoading } = useWodByDate(formatDate(currentDate));
   const { isAdmin } = useIsAdmin(user?.uid);
   const { comments, commentText, setCommentText, submitting, fetchComments, handleAddComment, handleDeleteComment, handleToggleLike } = useComments(
     wod?.id,
@@ -39,7 +39,6 @@ export default function WodPage() {
   useEffect(() => {
     if (wod) fetchComments(wod.id);
   }, [wod]);
-
   if (loading) return <div className="min-h-screen bg-[#0a0a0a]" />;
 
   return (

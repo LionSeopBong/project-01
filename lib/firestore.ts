@@ -14,6 +14,8 @@ import {
   limit,
   orderBy,
   query,
+  serverTimestamp,
+  setDoc,
   Timestamp,
   updateDoc,
   where,
@@ -149,4 +151,15 @@ export const getWorkoutRecord = async (id: string): Promise<WorkoutRecord | null
 export const updateWorkoutRecord = async (id: string, record: Partial<WorkoutRecord>) => {
   const docRef = doc(db, "workoutRecords", id);
   await updateDoc(docRef, record);
+};
+// 유저 정보 생성
+export const createUser = async (uid: string, data: Omit<User, "id" | "createdAt">) => {
+  await setDoc(doc(db, "users", uid), {
+    ...data,
+    createdAt: serverTimestamp(),
+  });
+};
+// 유저 정보수정
+export const updateUser = async (uid: string, data: Partial<User>) => {
+  await updateDoc(doc(db, "users", uid), data);
 };
