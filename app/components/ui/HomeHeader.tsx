@@ -12,7 +12,7 @@ import { faDumbbell, faFilePen, faHandFist, faUser, faGear } from "@fortawesome/
 const menuItems = [
   { href: "/wod", label: "WOD", icon: faDumbbell },
   { href: "/record", label: "Record", icon: faFilePen },
-  { href: "/prdata", label: "PR Data", icon: faHandFist },
+  { href: "/prdata", label: "PR Board", icon: faHandFist },
   { href: "/profile", label: "Profile", icon: faUser },
 ];
 

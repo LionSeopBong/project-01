@@ -7,7 +7,7 @@ const navItems = [
   { href: "/home", label: "Home", icon: faHouse },
   { href: "/wod", label: "WOD", icon: faDumbbell },
   { href: "/record", label: "Record", icon: faFilePen },
-  { href: "/prdata", label: "PR Data", icon: faHandFist },
+  { href: "/prdata", label: "PR Board", icon: faHandFist },
   { href: "/profile", label: "Profile", icon: faUser },
 ];
 

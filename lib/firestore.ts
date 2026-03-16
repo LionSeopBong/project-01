@@ -1,6 +1,6 @@
 import { db } from "@/lib/firebase";
 import { getLocalToday } from "@/lib/utils";
-import { User, Wod, WodComment, WorkoutRecord } from "@/types/wod";
+import { PrRecord, User, Wod, WodComment, WorkoutRecord } from "@/types/wod";
 import {
   addDoc,
   arrayRemove,
@@ -162,4 +162,19 @@ export const createUser = async (uid: string, data: Omit<User, "id" | "createdAt
 // 유저 정보수정
 export const updateUser = async (uid: string, data: Partial<User>) => {
   await updateDoc(doc(db, "users", uid), data);
+};
+// PR 기록 추가
+export const addPrRecord = async (record: Omit<PrRecord, "id">) => {
+  await addDoc(collection(db, "prRecords"), record);
+};
+
+// PR 기록 조회
+export const getMyPrRecords = async (userId: string): Promise<PrRecord[]> => {
+  const q = query(collection(db, "prRecords"), where("userId", "==", userId), orderBy("recordedAt", "desc"));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as unknown as PrRecord[];
+};
+// PR 기록 삭제
+export const deletePrRecord = async (id: string) => {
+  await deleteDoc(doc(db, "prRecords", id));
 };

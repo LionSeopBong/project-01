@@ -108,3 +108,13 @@ export interface WorkoutRecord {
 
   createdAt: any;
 }
+
+export interface PrRecord {
+  id: string;
+  userId: string;
+  exercise: string; // "Back Squat" | "Snatch" | "Clean" | "Push Press" | "Deadlift"
+  weight: number;
+  unit: string; // "kg" | "lb"
+  recordedAt: string; // YYYY-MM-DD
+  createdAt: any;
+}
