@@ -22,7 +22,7 @@
 
 ## 📱 페이지 구성
 
-하단 네비게이션 바 고정: `Home` / `WOD` / `Record` / `Timer` / `Profile`
+하단 네비게이션 바 고정: `Home` / `WOD` / `Record` / `pr` / `Profile`
 
 ### 🏠 Home
 
@@ -43,14 +43,6 @@
 - 개인 최고 기록 (PR) — 3RM Squat, 1RM Deadlift 등
 - 오늘의 WOD 완료 기록 (시간, 칼로리)
 - 날짜별 운동 히스토리 (WOD, Running 등)
-
-### ⏱ Timer
-
-- 타이머 모드 선택: `AMRAP` / `For Time` / `EMOM`
-- 분/초 직접 입력
-- Start / Pause / Reset 컨트롤
-- 설정한 시간안에 WOD 종료 시 Round, Rep, 무게 등 입력 데이터 폼 작성
-- 작성한 데이터는 바로 오늘의 운동 히스토리 data로 저장
 
 ### 👤 Profile
 
@@ -136,7 +128,7 @@ app/
 ├── page.tsx                    # Home
 ├── wod/page.tsx                # WOD 상세
 ├── record/page.tsx             # 기록
-├── timer/page.tsx              # 타이머
+├── PRData/page.tsx              # PR Data
 ├── profile/page.tsx            # 프로필
 └── layout.tsx                  # 공통 레이아웃 (BottomNav 포함)
 
@@ -145,7 +137,7 @@ components/
     ├── GlowButton.tsx          # 발광 버튼 (재사용)
     ├── BottomNav.tsx           # 하단 네비게이션 바
     ├── WodCard.tsx             # WOD 카드
-    ├── TimerWidget.tsx         # 타이머 위젯
+    ├── PR.tsx         # PR 위젯
     └── StatCard.tsx            # 통계 카드
 
 lib/
@@ -163,7 +155,7 @@ lib/
 | 2단계 | Firebase Auth 로그인 구현             | Google 소셜 로그인      |
 | 3단계 | BottomNav + 공통 레이아웃 구성        | app/layout.tsx          |
 | 4단계 | Home + WOD 화면 개발                  | 핵심 기능               |
-| 5단계 | Timer 기능 개발                       | AMRAP / For Time / EMOM |
+| 5단계 | PR 기능 개발                          | AMRAP / For Time / EMOM |
 | 6단계 | Record + PR 기록 저장                 | Firestore 연동          |
 | 7단계 | Profile + 통계 화면                   | weeklyStats 집계        |
 | 8단계 | UI 다듬기 + 반응형 최적화             | 모바일 퍼스트           |

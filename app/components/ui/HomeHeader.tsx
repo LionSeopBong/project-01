@@ -1,16 +1,19 @@
 import { useAuth } from "@/context/AuthContext";
+import { useUserInfo } from "@/hooks/user/useUserInfo";
 import { logOut } from "@/lib/auth";
 import { getUser } from "@/lib/firestore";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDumbbell, faFilePen, faHandFist, faUser, faGear } from "@fortawesome/free-solid-svg-icons";
 
 const menuItems = [
-  { href: "/wod", label: "WOD", icon: "💪" },
-  { href: "/record", label: "Record", icon: "📊" },
-  { href: "/timer", label: "Timer", icon: "⏱" },
-  { href: "/profile", label: "Profile", icon: "👤" },
+  { href: "/wod", label: "WOD", icon: faDumbbell },
+  { href: "/record", label: "Record", icon: faFilePen },
+  { href: "/prdata", label: "PR Data", icon: faHandFist },
+  { href: "/profile", label: "Profile", icon: faUser },
 ];
 
 export default function HomeHeader() {
@@ -18,6 +21,7 @@ export default function HomeHeader() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
+  const { userInfo } = useUserInfo(user?.uid ?? "");
 
   const handleLogout = async () => {
     await logOut();
@@ -82,6 +86,9 @@ export default function HomeHeader() {
 
         {/* 메뉴 항목 */}
         <nav className="flex flex-col px-4 pt-6 gap-1">
+          <h1 className="text-white font-bold tracking-wider uppercase text-sm">
+            반가워요 <span className="text-blue-400">{userInfo?.name}</span> 님!
+          </h1>
           {menuItems.map((item) => (
             <Link
               key={item.href}
@@ -89,10 +96,20 @@ export default function HomeHeader() {
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-4 px-4 py-4 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
             >
-              <span className="text-xl">{item.icon}</span>
+              <FontAwesomeIcon icon={item.icon} size="xl" />
               <span className="font-bold tracking-wider uppercase text-sm">{item.label}</span>
             </Link>
           ))}
+          {isAdmin && (
+            <Link
+              href="/admin/wod"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-4 px-4 py-4 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+            >
+              <FontAwesomeIcon icon={faGear} size="xl" className="text-[#FF3B30]" />
+              <span className="font-bold tracking-wider uppercase text-sm">WOD 관리</span>
+            </Link>
+          )}
         </nav>
 
         {/* 로그아웃 */}
@@ -105,16 +122,6 @@ export default function HomeHeader() {
             로그아웃
           </button>
         </div>
-        {isAdmin && (
-          <Link
-            href="/admin/wod"
-            onClick={() => setMenuOpen(false)}
-            className="flex items-center gap-4 px-4 py-4 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
-          >
-            <span className="text-xl">⚙️</span>
-            <span className="font-bold tracking-wider uppercase text-sm">WOD 관리</span>
-          </Link>
-        )}
       </div>
     </>
   );

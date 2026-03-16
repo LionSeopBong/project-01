@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHouse, faDumbbell, faFilePen, faHandFist, faUser } from "@fortawesome/free-solid-svg-icons";
 
 const navItems = [
-  { href: "/home", label: "Home", icon: "🏠" },
-  { href: "/wod", label: "WOD", icon: "💪" },
-  { href: "/record", label: "Record", icon: "📊" },
-  { href: "/timer", label: "Timer", icon: "⏱" },
-  { href: "/profile", label: "Profile", icon: "👤" },
+  { href: "/home", label: "Home", icon: faHouse },
+  { href: "/wod", label: "WOD", icon: faDumbbell },
+  { href: "/record", label: "Record", icon: faFilePen },
+  { href: "/prdata", label: "PR Data", icon: faHandFist },
+  { href: "/profile", label: "Profile", icon: faUser },
 ];
 
 export default function BottomNav() {
@@ -21,7 +23,8 @@ export default function BottomNav() {
             href={item.href}
             className={`flex flex-col items-center gap-1 text-xs transition ${isActive ? "text-[#E63946]" : "text-zinc-500"}`}
           >
-            <span className="text-xl">{item.icon}</span>
+            {/* <span className="text-xl">{item.icon}</span> */}
+            <FontAwesomeIcon icon={item.icon} size="xl" />
             <span>{item.label}</span>
           </Link>
         );

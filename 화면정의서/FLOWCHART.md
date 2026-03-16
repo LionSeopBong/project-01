@@ -21,7 +21,7 @@ flowchart TD
     H --> TAB1[Home 탭]
     H --> TAB2[WOD 탭]
     H --> TAB3[Record 탭]
-    H --> TAB4[Timer 탭]
+    H --> TAB4[PR 탭]
     H --> TAB5[Profile 탭]
 ```
 
@@ -52,7 +52,7 @@ flowchart TD
     W[WOD] --> W1[오늘의 WOD 상세\n타입 / 라운드 / 무브먼트]
     W1 --> W2[Start Workout 버튼]
     W2 --> W3[운동 진행 화면\n현재 무브먼트 강조]
-    W2 --> W8[Timer 탭 연동\n타이머 자동 시작]
+    W2 --> W8[PR 탭 연동\n타이머 자동 시작]
     W3 --> W4{운동 완료?}
     W4 -- 완료 --> W5[End Workout]
     W5 --> W6[기록 저장 팝업\n시간 / 칼로리 확인]
@@ -78,37 +78,6 @@ flowchart TD
 ```
 
 ---
-
-## ⏱ Timer 탭 흐름
-
-```mermaid
-flowchart TD
-    T[Timer] --> T1{모드 선택}
-    T1 --> T2[AMRAP]
-    T1 --> T3[For Time]
-    T1 --> T4[EMOM]
-
-    T2 --> T5[시간 설정]
-    T3 --> T5
-    T4 --> T5
-
-    T5 --> T6[Start]
-    T6 --> T7{타이머 동작 중}
-    T7 --> T8[Pause]
-    T8 --> T7
-    T7 --> T9{시간 내 WOD 종료?}
-
-    T9 -- 완료 --> T10[결과 입력 폼\nRound / Reps / 무게 입력]
-    T9 -- 시간 초과 --> T11[타임캡 알림\n결과 입력 폼]
-
-    T10 --> T12[오늘의 운동 히스토리에 저장\nworkoutRecords]
-    T11 --> T12
-
-    T12 --> T13{PR 갱신 여부}
-    T13 -- 갱신 --> T14[prRecords 저장]
-    T13 -- 건너뜀 --> T[Timer]
-    T14 --> T[Timer]
-```
 
 ---
 
@@ -147,8 +116,7 @@ flowchart LR
 
     wods -- 오늘의 WOD --> WODPage[WOD 탭]
     WODPage -- 완료 기록 --> workoutRecords
-    TimerPage[Timer 탭] -- 결과 입력 폼 --> workoutRecords
-    TimerPage -- PR 갱신 --> prRecords
+
     workoutRecords -- 통계 집계 --> weeklyStats
     weeklyStats -- 주간 요약 --> HomePage[Home 탭]
     prRecords -- PR 표시 --> RecordPage[Record 탭]
@@ -157,4 +125,4 @@ flowchart LR
 
 ---
 
-*WODX — Build The Athlete* 🔥
+_WODX — Build The Athlete_ 🔥
