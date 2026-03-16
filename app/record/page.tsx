@@ -12,6 +12,8 @@ import { useMemo, useState } from "react";
 import { useWodByDate } from "@/hooks/wod/useWodByDate";
 import { useLeaderboard } from "@/hooks/record/useLeaderBoard";
 import { getResultText, getSortedRecords, getLevelColor } from "@/lib/utils";
+import { useMyPrRecords } from "@/hooks/record/useMyPrRecords";
+import AthleteRadar from "@/app/components/ui/AthleteRadar";
 
 export default function RecordPage() {
   // 로그인 확인
@@ -33,6 +35,8 @@ export default function RecordPage() {
   const { leaderboard, leaderboardLoading } = useLeaderboard(selectedDate);
 
   const gender = activeTab === "leaderboard_men" ? "male" : "female";
+  // 레이더 차트 데이터
+  const { prRecords } = useMyPrRecords(user?.uid ?? "");
 
   if (loading) return <div className="min-h-screen bg-[#0a0a0a]" />;
 
@@ -54,6 +58,7 @@ export default function RecordPage() {
         </div>
         {user && <AttendanceCalendar userId={user.uid} onDateClick={(date) => setSelectedDate(date)} />}
       </section>
+      <AthleteRadar prRecords={prRecords} />
       {/* 탭 */}
       <div className="flex gap-2 mt-3 mb-3">
         {[
