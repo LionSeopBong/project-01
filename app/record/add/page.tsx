@@ -3,6 +3,7 @@
 import HomeHeader from "@/app/components/ui/HomeHeader";
 import { useAuthGuard } from "@/hooks/auth/useAuthGuard";
 import { useRecordForm } from "@/hooks/record/useRecordForm";
+import { useUserInfo } from "@/hooks/user/useUserInfo";
 import { useWod } from "@/hooks/wod/useWod";
 import { LEVELS } from "@/lib/constants";
 
@@ -16,6 +17,8 @@ export default function AddRecordPage() {
   const searchParams = useSearchParams();
   const wodId = searchParams.get("wodId");
   const { wod, wodLoading } = useWod(wodId ?? "");
+  const { userInfo } = useUserInfo(user?.uid ?? "");
+
   const { selectedPart, recordPart, setRecordPart, finishMin, setFinishMin, finishSec, setFinishSec, submitting, currentPart, handlePartChange, handleSubmit } =
     useRecordForm(wod || null);
 
@@ -417,7 +420,7 @@ export default function AddRecordPage() {
 
       {/*  제출 버튼 */}
       <button
-        onClick={() => handleSubmit(user?.uid ?? "", user?.displayName ?? "")}
+        onClick={() => handleSubmit(user?.uid ?? "", userInfo?.name ?? "", userInfo?.gender ?? "")}
         disabled={submitting}
         className="w-full py-4 mt-3 bg-[#E63946] rounded-xl text-white font-black text-lg tracking-wider uppercase disabled:opacity-50 transition"
       >

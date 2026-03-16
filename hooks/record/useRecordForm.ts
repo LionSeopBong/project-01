@@ -80,7 +80,7 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
     setSelectedPart(part);
   };
 
-  const handleSubmit = async (userId: string, userName: string) => {
+  const handleSubmit = async (userId: string, userName: string, gender: string) => {
     if (!wod) return;
     setSubmitting(true);
     try {
@@ -100,6 +100,7 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
           wodName: wod.title,
           wodPart: part.part,
           wodType: part.type,
+          gender,
           completedAt: wod.date,
           isDNF: partRecord.isDNF ?? false,
           level: partRecord.level ?? "R'xd",

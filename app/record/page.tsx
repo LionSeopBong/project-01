@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useWodByDate } from "@/hooks/wod/useWodByDate";
 import { useLeaderboard } from "@/hooks/record/useLeaderBoard";
-import { getResultText, getSortedRecords } from "@/lib/utils";
+import { getResultText, getSortedRecords, getLevelColor } from "@/lib/utils";
 
 export default function RecordPage() {
   // 로그인 확인
@@ -20,7 +20,7 @@ export default function RecordPage() {
   const { dateStr } = useDate();
 
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"my" | "leaderboard">("my");
+  const [activeTab, setActiveTab] = useState<"my" | "leaderboard_men" | "leaderboard_women">("my");
   const [selectedDate, setSelectedDate] = useState(getLocalToday());
   //나의 기록 불러오기
   const { myRecords, recordsLoading, refetch } = useMyRecords(user?.uid ?? "");
@@ -31,6 +31,8 @@ export default function RecordPage() {
   // 리더보드 state
   const [selectedPart, setSelectedPart] = useState("A");
   const { leaderboard, leaderboardLoading } = useLeaderboard(selectedDate);
+
+  const gender = activeTab === "leaderboard_men" ? "male" : "female";
 
   if (loading) return <div className="min-h-screen bg-[#0a0a0a]" />;
 
@@ -56,11 +58,12 @@ export default function RecordPage() {
       <div className="flex gap-2 mt-3 mb-3">
         {[
           { key: "my", label: "내 기록" },
-          { key: "leaderboard", label: "리더보드" },
+          { key: "leaderboard_men", label: "리더보드(남)" },
+          { key: "leaderboard_women", label: "리더보드(여)" },
         ].map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key as "my" | "leaderboard")}
+            onClick={() => setActiveTab(tab.key as "my" | "leaderboard_men" | "leaderboard_women")}
             className={`px-3 py-2 rounded-xl text-sm font-black border transition ${
               activeTab === tab.key ? "bg-[#E63946] border-[#E63946] text-white" : "bg-zinc-800 border-zinc-700 text-zinc-400"
             }`}
@@ -136,7 +139,7 @@ export default function RecordPage() {
         </div>
       )}{" "}
       {/* 리더보드 탭 */}
-      {activeTab === "leaderboard" && (
+      {(activeTab === "leaderboard_men" || activeTab === "leaderboard_women") && (
         <div className="space-y-4">
           {/* 파트 선택 */}
           <div className="flex gap-2">
@@ -157,9 +160,7 @@ export default function RecordPage() {
 
           {/* 레벨별 섹션 */}
           {(["Athlete", "R'xd", "Scale", "Beginner"] as const).map((level) => {
-            const levelRecords = getSortedRecords(leaderboard.filter((r) => r.wodPart === selectedPart && r.level === level && !r.isDNF));
-            const dnfRecords = leaderboard.filter((r) => r.wodPart === selectedPart && r.level === level && r.isDNF);
-            const allRecords = [...levelRecords, ...dnfRecords];
+            const allRecords = getSortedRecords(leaderboard.filter((r) => r.wodPart === selectedPart && r.level === level && r.gender === gender));
             if (allRecords.length === 0) return null;
 
             return (
@@ -171,16 +172,10 @@ export default function RecordPage() {
                       {/* 순위 */}
                       <span
                         className={`text-sm font-black w-6 text-center ${
-                          index === 0 && !record.isDNF
-                            ? "text-yellow-400"
-                            : index === 1 && !record.isDNF
-                              ? "text-zinc-300"
-                              : index === 2 && !record.isDNF
-                                ? "text-amber-600"
-                                : "text-zinc-600"
+                          index === 0 ? "text-yellow-400" : index === 1 ? "text-zinc-300" : index === 2 ? "text-amber-600" : "text-zinc-600"
                         }`}
                       >
-                        {record.isDNF ? "-" : index + 1}
+                        {index + 1}
                       </span>
 
                       {/* 이름 */}
@@ -188,7 +183,10 @@ export default function RecordPage() {
 
                       {/* 결과 */}
                       {}
-                      <span className={`text-sm font-black ${record.isDNF ? "text-zinc-600" : "text-white"}`}>{getResultText(record)}</span>
+
+                      <span className={`text-sm font-black ${record.isDNF ? "text-zinc-400" : "text-white"}`}>
+                        <span className={`text-sm ${getLevelColor(record.level)}`}>{record.level}</span>&nbsp;{getResultText(record)}
+                      </span>
                     </div>
                   ))}
                 </div>

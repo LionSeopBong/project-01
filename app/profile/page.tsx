@@ -33,8 +33,6 @@ export default function ProfilePage() {
     if (!user) return;
     setSubmitting(true);
     try {
-      console.log("editData", editData); // ← 추가
-
       await updateUser(user.uid, editData);
       await refetch();
       setIsEditing(false);
