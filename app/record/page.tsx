@@ -41,7 +41,7 @@ export default function RecordPage() {
   if (loading) return <div className="min-h-screen bg-[#0a0a0a]" />;
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] px-4 mb-16">
+    <main className="min-h-screen bg-[#0a0a0a] px-4 pb-16 mb-10">
       <HomeHeader />
       {/* 헤더 */}
       <div className="mb-6">
@@ -60,7 +60,7 @@ export default function RecordPage() {
       </section>
       <AthleteRadar prRecords={prRecords} />
       {/* 탭 */}
-      <div className="flex gap-2 mt-3 mb-3">
+      <div className="flex gap-2 mt-3 mb-4">
         {[
           { key: "my", label: "내 기록" },
           { key: "leaderboard_men", label: "리더보드(남)" },
@@ -79,7 +79,7 @@ export default function RecordPage() {
       </div>
       {/* 내 기록 */}
       {activeTab === "my" && (
-        <div className="space-y-3">
+        <div className="space-y-3 mt-2">
           {recordsLoading && <div className="text-zinc-500 text-sm text-center py-10">불러오는 중...</div>}
           {!recordsLoading && todayRecords.length === 0 && (
             <div className="text-center py-10 space-y-3">

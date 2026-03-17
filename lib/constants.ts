@@ -40,10 +40,19 @@ export const PR_EXERCISES = [
   { category: "Conditioning", name: "Jeckie" },
 ];
 // 레이더 차트
+// export const PR_RADAR_CONFIG = [
+//   { subject: "Strength", exercise: "Back Squat", max: 250 }, // 250lb 목표
+//   { subject: "Power", exercise: "Clean", max: 200 }, // 200lb 목표
+//   { subject: "Endurance", exercise: "5km Run", max: 1200, inverse: true }, // 20분 목표 (낮을수록 좋음)
+//   { subject: "Skill", exercise: "Pull-Up", max: 50 }, // 50reps 목표
+//   { subject: "Conditioning", exercise: "Jeckie", max: 360, inverse: true }, // 6분 목표
+// ];
+
+// constants.ts 에 type 추가
 export const PR_RADAR_CONFIG = [
-  { subject: "Strength", exercise: "Back Squat", max: 250 }, // 250lb 목표
-  { subject: "Power", exercise: "Clean", max: 200 }, // 200lb 목표
-  { subject: "Endurance", exercise: "5km Run", max: 1200, inverse: true }, // 20분 목표 (낮을수록 좋음)
-  { subject: "Skill", exercise: "Pull-Up", max: 50 }, // 50reps 목표
-  { subject: "Conditioning", exercise: "Jeckie", max: 360, inverse: true }, // 6분 목표
+  { subject: "Strength", exercises: ["Back Squat", "Deadlift", "Push Press"], max: 350, inverse: false, valueType: "weight" },
+  { subject: "Power", exercises: ["Snatch", "Clean"], max: 300, inverse: false, valueType: "weight" },
+  { subject: "Endurance", exercises: ["5km Run", "10km Run", "21km Run"], max: 1200, inverse: true, valueType: "time" },
+  { subject: "Skill", exercises: ["Pull-Up", "Ring Muscle-Up"], max: 50, inverse: false, valueType: "reps" },
+  { subject: "Conditioning", exercises: ["Fran", "Grace", "Helen", "Isabel", "Jeckie"], max: 360, inverse: true, valueType: "time" },
 ];
