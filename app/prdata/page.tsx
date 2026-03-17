@@ -68,7 +68,7 @@ export default function PRDataPage() {
         exercise: selectedExercise,
         reps: selectedCategory === "Skill" ? reps : 0,
 
-        weight: selectedCategory === "Strength" ? weight : 0,
+        weight: selectedCategory === "Strength" || selectedCategory === "Power" ? weight : 0,
         time: selectedCategory === "Endurance" || selectedCategory === "Conditioning" ? timeHour * 3600 + timeMin * 60 + timeSec : 0,
         unit,
         recordedAt,
@@ -122,7 +122,7 @@ export default function PRDataPage() {
                     <p className="text-white font-black text-base">{name}</p>
                     {best ? (
                       <p className="text-[#E63946] font-black text-2xl mt-1">
-                        {category === "Strength" ? (
+                        {category === "Strength" || category === "Power" ? (
                           <>
                             {best.weight}
                             <span className="text-sm text-zinc-500 ml-1">{best.unit}</span>
@@ -242,7 +242,7 @@ export default function PRDataPage() {
             </div>
 
             {/* Strength - 무게 입력 */}
-            {selectedCategory === "Strength" && (
+            {(selectedCategory === "Strength" || selectedCategory === "Power") && (
               <div>
                 <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">무게</label>
                 <div className="flex gap-2">

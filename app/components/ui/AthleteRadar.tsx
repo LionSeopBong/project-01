@@ -1,7 +1,7 @@
 "use client";
 
 import { PrRecord } from "@/types/wod";
-import { PR_RADAR_CONFIG } from "@/lib/constants";
+import { PR_RADAR_CONFIG, SKILL_WEIGHTS, STRENGTH_WEIGHTS, POWER_WEIGHTS, ENDURANCE_WIGHTS } from "@/lib/constants";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer } from "recharts";
 
 interface Props {
@@ -20,8 +20,19 @@ export default function AthleteRadar({ prRecords }: Props) {
       return (cur.weight ?? 0) > (best.weight ?? 0) ? cur : best;
     });
 
-    const value = valueType === "time" ? (best.time ?? 0) : valueType === "reps" ? (best.reps ?? 0) : (best.weight ?? 0);
+    let value = valueType === "time" ? (best.time ?? 0) : valueType === "reps" ? (best.reps ?? 0) : (best.weight ?? 0);
 
+    // 가중치 적용
+    if (valueType === "reps" && SKILL_WEIGHTS[exercise]) {
+      value = value * SKILL_WEIGHTS[exercise];
+    } else if (valueType === "weight") {
+      if (POWER_WEIGHTS[exercise]) value = value * POWER_WEIGHTS[exercise];
+      else if (STRENGTH_WEIGHTS[exercise]) value = value * STRENGTH_WEIGHTS[exercise];
+    } else if (valueType === "time" && ENDURANCE_WIGHTS[exercise]) {
+      // Endurance 는 시간이 낮을수록 좋으니까
+      // 가중치를 나누기로 적용 (거리가 길수록 같은 시간에 더 좋은 점수)
+      value = value / ENDURANCE_WIGHTS[exercise];
+    }
     if (value === 0) return null;
 
     return inverse ? Math.min(100, Math.round((max / value) * 100)) : Math.min(100, Math.round((value / max) * 100));
