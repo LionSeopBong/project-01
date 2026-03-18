@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDumbbell, faFilePen, faHandFist, faUser, faGear, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { useNotifications } from "@/hooks/user/useNotifications";
 
 const menuItems = [
   { href: "/wod", label: "WOD", icon: faDumbbell },
@@ -23,6 +24,10 @@ export default function HomeHeader() {
   const router = useRouter();
   const { userInfo } = useUserInfo(user?.uid ?? "");
 
+  // 알림 훅
+  // 훅 추가
+  const { notifications, notificationsLoading, unreadCount, readAll } = useNotifications(user?.uid ?? "");
+  const [notifOpen, setNotifOpen] = useState(false);
   const handleLogout = async () => {
     await logOut();
     router.push("/");
@@ -45,7 +50,13 @@ export default function HomeHeader() {
         {/* 우측 아이콘들 */}
         <div className="flex items-center gap-4">
           {/* 알림 아이콘 */}
-          <button className="text-zinc-400 hover:text-white transition">
+          <button
+            onClick={() => {
+              setNotifOpen(true);
+              readAll();
+            }}
+            className="text-zinc-400 hover:text-white transition relative"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 strokeLinecap="round"
@@ -54,8 +65,44 @@ export default function HomeHeader() {
                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
               />
             </svg>
+            {/* 읽지 않은 알림 뱃지 */}
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-[#E63946] text-white text-xs font-black rounded-full w-4 h-4 flex items-center justify-center">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </button>
+          {/* 알림 오버레이 */}
+          {notifOpen && <div className="fixed inset-0 bg-black/60 z-40" onClick={() => setNotifOpen(false)} />}
 
+          {/* 알림 패널 */}
+          <div
+            className={`fixed top-0 right-0 h-full w-72 bg-[#111111] z-50 transform transition-transform duration-300 ${
+              notifOpen ? "translate-x-0" : "translate-x-full"
+            }`}
+          >
+            {/* 패널 헤더 */}
+            <div className="flex items-center justify-between px-6 pt-10 pb-4 border-b border-zinc-800">
+              <h2 className="text-white font-black text-lg">알림</h2>
+              <button onClick={() => setNotifOpen(false)} className="text-zinc-400 hover:text-white transition">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* 알림 목록 */}
+            <div className="flex flex-col px-4 pt-4 gap-2 overflow-y-auto h-[calc(100%-80px)]">
+              {notificationsLoading && <p className="text-zinc-500 text-sm text-center py-10">불러오는 중...</p>}
+              {!notificationsLoading && notifications.length === 0 && <p className="text-zinc-500 text-sm text-center py-10">알림이 없어요</p>}
+              {notifications.map((notif) => (
+                <div key={notif.id} className={`p-3 rounded-xl text-sm transition ${notif.isRead ? "bg-zinc-900 text-zinc-500" : "bg-zinc-800 text-white"}`}>
+                  <p className="font-bold">{notif.message}</p>
+                  <p className="text-xs text-zinc-600 mt-1">{new Date(notif.createdAt?.seconds * 1000).toLocaleDateString("ko-KR")}</p>
+                </div>
+              ))}
+            </div>
+          </div>
           {/* 버거 메뉴 */}
           <button onClick={() => setMenuOpen(true)} className="text-zinc-400 hover:text-white transition">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">

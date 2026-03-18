@@ -1,6 +1,6 @@
 import { db } from "@/lib/firebase";
 import { getLocalToday } from "@/lib/utils";
-import { PrRecord, User, Wod, WodComment, WorkoutRecord } from "@/types/wod";
+import { Notification, PrRecord, User, Wod, WodComment, WorkoutRecord } from "@/types/wod";
 import {
   addDoc,
   arrayRemove,
@@ -177,4 +177,32 @@ export const getMyPrRecords = async (userId: string): Promise<PrRecord[]> => {
 // PR 기록 삭제
 export const deletePrRecord = async (id: string) => {
   await deleteDoc(doc(db, "prRecords", id));
+};
+// 알림 조회
+export const getNotifications = async (userId: string): Promise<Notification[]> => {
+  const q = query(collection(db, "notifications"), where("userId", "==", userId), orderBy("createdAt", "desc"));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as unknown as Notification[];
+};
+
+// 알림 읽음 처리
+export const markNotificationRead = async (id: string) => {
+  await updateDoc(doc(db, "notifications", id), { isRead: true });
+};
+
+// 알림 전체 읽음 처리
+export const markAllNotificationsRead = async (userId: string) => {
+  const notifications = await getNotifications(userId);
+  const unread = notifications.filter((n) => !n.isRead);
+  await Promise.all(unread.map((n) => markNotificationRead(n.id)));
+};
+
+// 알림 생성
+export const createNotification = async (data: Omit<Notification, "id">) => {
+  await addDoc(collection(db, "notifications"), data);
+};
+// 전체 유저 알림
+export const getAllUsers = async (): Promise<User[]> => {
+  const snapshot = await getDocs(collection(db, "users"));
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as unknown as User[];
 };

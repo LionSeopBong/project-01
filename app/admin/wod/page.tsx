@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { createWod } from "@/lib/firestore";
+import { createNotification, createWod, getAllUsers } from "@/lib/firestore";
 import { WodPart } from "@/types/wod";
 import { useAdminGuard } from "@/hooks/auth/useAdminGuard";
 
@@ -74,6 +74,20 @@ export default function AdminWodPage() {
         note,
         createdAt: null,
       });
+      // 모든 유저에게 알림 전송
+      const users = await getAllUsers();
+      await Promise.all(
+        users.map((u) =>
+          createNotification({
+            userId: u.id,
+            type: "wod_registered",
+            message: `오늘의 WOD가 등록되었어요! 📋`,
+            isRead: false,
+            createdAt: null,
+            link: "/wod",
+          }),
+        ),
+      );
       alert("WOD 등록 완료!");
       router.push("/home");
     } catch (error) {
@@ -205,8 +219,8 @@ export default function AdminWodPage() {
                       }}
                       className="bg-zinc-800 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
                     >
-                      <option value="kg">kg</option>
                       <option value="lb">lb</option>
+                      <option value="kg">kg</option>
                     </select>
 
                     {/* 삭제 */}
@@ -228,7 +242,7 @@ export default function AdminWodPage() {
               <button
                 onClick={() => {
                   const updated = [...parts];
-                  updated[partIndex].weights = [...(updated[partIndex].weights ?? []), { tool: "Barbell", maleWeight: 0, femaleWeight: 0, unit: "kg" }];
+                  updated[partIndex].weights = [...(updated[partIndex].weights ?? []), { tool: "Barbell", maleWeight: 0, femaleWeight: 0, unit: "lb" }];
                   setParts(updated);
                 }}
                 className="mt-3 w-full py-2.5 border border-dashed border-zinc-700 rounded-xl text-zinc-500 text-sm hover:border-[#E63946] hover:text-[#E63946] transition"

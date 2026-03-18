@@ -108,7 +108,7 @@ export interface WorkoutRecord {
 
   createdAt: any;
 }
-
+// PR data
 export interface PrRecord {
   id: string;
   userId: string;
@@ -120,4 +120,14 @@ export interface PrRecord {
   unit: string;
   recordedAt: string;
   createdAt: any;
+}
+// 알림타입
+export interface Notification {
+  id: string;
+  userId: string; // 받는 사람
+  type: "wod_registered" | "comment_like" | "comment_reply";
+  message: string;
+  isRead: boolean;
+  createdAt: any;
+  link?: string; // 클릭 시 이동할 경로
 }

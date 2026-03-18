@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getComments, addComment, deleteComments, toggleLike } from "@/lib/firestore";
+import { getComments, addComment, deleteComments, toggleLike, getAllUsers, createNotification } from "@/lib/firestore";
 import { WodComment } from "@/types/wod";
 import { Timestamp } from "firebase/firestore";
 
@@ -44,6 +44,21 @@ export const useComments = (wodId: string | undefined, userId: string | undefine
   const handleToggleLike = async (commentId: string, isLiked: boolean) => {
     if (!userId || !wodId) return;
     await toggleLike(commentId, userId, isLiked);
+
+    if (!isLiked) {
+      const comment = comments.find((c) => c.id === commentId);
+      if (comment && comment.userId !== userId) {
+        // 본인 댓글엔 알림 없음
+        await createNotification({
+          userId: comment.userId,
+          type: "comment_like",
+          message: `누군가 회원님의 댓글을 좋아해를 눌렀어요 ❤️`,
+          isRead: false,
+          createdAt: null,
+          link: "/wod",
+        });
+      }
+    }
     await fetchComments(wodId);
   };
 
