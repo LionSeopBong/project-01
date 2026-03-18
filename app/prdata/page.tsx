@@ -248,7 +248,7 @@ export default function PRDataPage() {
                 <div className="flex gap-2">
                   <input
                     type="number"
-                    value={weight}
+                    value={weight || ""}
                     onChange={(e) => setWeight(Number(e.target.value))}
                     className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#E63946]"
                   />
@@ -272,7 +272,7 @@ export default function PRDataPage() {
                 <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">Max Reps</label>
                 <input
                   type="number"
-                  value={reps}
+                  value={reps || ""}
                   onChange={(e) => setReps(Number(e.target.value))}
                   placeholder="0"
                   className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#E63946]"
@@ -295,7 +295,7 @@ export default function PRDataPage() {
                   <span className="text-zinc-500 text-sm">시</span>
                   <input
                     type="number"
-                    value={timeMin}
+                    value={timeMin || ""}
                     onChange={(e) => setTimeMin(Number(e.target.value))}
                     placeholder="0"
                     className="w-16 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-white text-center text-sm focus:outline-none focus:border-[#E63946]"
@@ -303,7 +303,7 @@ export default function PRDataPage() {
                   <span className="text-zinc-500 text-sm">분</span>
                   <input
                     type="number"
-                    value={timeSec}
+                    value={timeSec || ""}
                     onChange={(e) => setTimeSec(Number(e.target.value))}
                     placeholder="0"
                     className="w-16 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-white text-center text-sm focus:outline-none focus:border-[#E63946]"

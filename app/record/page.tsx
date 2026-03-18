@@ -83,12 +83,15 @@ export default function RecordPage() {
           {recordsLoading && <div className="text-zinc-500 text-sm text-center py-10">불러오는 중...</div>}
           {!recordsLoading && todayRecords.length === 0 && (
             <div className="text-center py-10 space-y-3">
-              <p className="text-zinc-500 text-sm">기록이 없어요</p>
+              <p className="text-zinc-500 text-sm">{selectedWod ? "기록이 없어요." : "오늘의 와드가 등록되지 않았어요"}</p>
               <button
                 onClick={() => {
                   if (selectedWod) router.push(`/record/add?wodId=${selectedWod.id}`);
                 }}
-                className="px-4 py-2 bg-[#E63946] rounded-xl text-white text-sm font-black"
+                disabled={!selectedWod}
+                className={`px-4 py-2 rounded-xl text-white text-sm font-black transition ${
+                  selectedWod ? "bg-[#E63946]" : "bg-zinc-700 opacity-50 cursor-not-allowed"
+                }`}
               >
                 + 기록 추가
               </button>

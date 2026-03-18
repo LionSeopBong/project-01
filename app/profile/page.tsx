@@ -154,7 +154,7 @@ export default function ProfilePage() {
               <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">몸무게 ({editData.unit})</label>
               <input
                 type="number"
-                value={editData.weight}
+                value={editData.weight || ""}
                 onChange={(e) => setEditData({ ...editData, weight: Number(e.target.value) })}
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#E63946]"
               />
@@ -165,7 +165,7 @@ export default function ProfilePage() {
               <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">키 (cm)</label>
               <input
                 type="number"
-                value={editData.height}
+                value={editData.height || ""}
                 onChange={(e) => setEditData({ ...editData, height: Number(e.target.value) })}
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#E63946]"
               />

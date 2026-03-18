@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDumbbell, faFilePen, faHandFist, faUser, faGear } from "@fortawesome/free-solid-svg-icons";
+import { faDumbbell, faFilePen, faHandFist, faUser, faGear, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 
 const menuItems = [
   { href: "/wod", label: "WOD", icon: faDumbbell },
@@ -110,18 +110,18 @@ export default function HomeHeader() {
               <span className="font-bold tracking-wider uppercase text-sm">WOD 관리</span>
             </Link>
           )}
+          {/* 로그아웃 */}
+          <div className="absolute bottom-17 left-0 right-0 px-8">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-4 px-4 py-4 rounded-xl text-[#E63946] hover:bg-zinc-800 transition font-bold tracking-wider uppercase text-sm"
+            >
+              <FontAwesomeIcon icon={faRightFromBracket} size="xl" className="text-[#FF3B30]" />
+              {/* <span className="text-xl">🚪</span> */}
+              로그아웃
+            </button>
+          </div>
         </nav>
-
-        {/* 로그아웃 */}
-        <div className="absolute bottom-10 left-0 right-0 px-8">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-4 px-4 py-4 rounded-xl text-[#E63946] hover:bg-zinc-800 transition font-bold tracking-wider uppercase text-sm"
-          >
-            <span className="text-xl">🚪</span>
-            로그아웃
-          </button>
-        </div>
       </div>
     </>
   );
