@@ -186,7 +186,7 @@ export default function AdminWodPage() {
                     {/* 남성 무게 */}
                     <input
                       type="number"
-                      value={w.maleWeight}
+                      value={w.maleWeight || ""}
                       onChange={(e) => {
                         const updated = [...parts];
                         updated[partIndex].weights[wIndex].maleWeight = Number(e.target.value);
@@ -199,7 +199,7 @@ export default function AdminWodPage() {
                     {/* 여성 무게 */}
                     <input
                       type="number"
-                      value={w.femaleWeight}
+                      value={w.femaleWeight || ""}
                       onChange={(e) => {
                         const updated = [...parts];
                         updated[partIndex].weights[wIndex].femaleWeight = Number(e.target.value);
