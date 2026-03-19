@@ -73,6 +73,14 @@ export const getComments = async (wodId: string): Promise<WodComment[]> => {
 
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as WodComment[];
 };
+
+// 같은 WOD 의 내 모든 파트 기록 불러오기
+export const getMyWodRecords = async (userId: string, wodId: string): Promise<WorkoutRecord[]> => {
+  const q = query(collection(db, "workoutRecords"), where("userId", "==", userId), where("wodId", "==", wodId));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as unknown as WorkoutRecord[];
+};
+
 // 댓글 등록
 export const addComment = async (comment: Omit<WodComment, "id">) => {
   const ref = await addDoc(collection(db, "comments"), {

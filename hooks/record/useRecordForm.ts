@@ -80,7 +80,7 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
     setSelectedPart(part);
   };
 
-  const handleSubmit = async (userId: string, userName: string, gender: string) => {
+  const handleSubmit = async (userId: string, userName: string, gender: string, existingRecords: WorkoutRecord[]) => {
     if (!wod) return;
     setSubmitting(true);
     try {
@@ -122,31 +122,58 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
       setSubmitting(false);
     }
   };
+  const initAllParts = (records: WorkoutRecord[]) => {
+    const parts: Record<string, Partial<WorkoutRecord>> = {};
+    const times: Record<string, { min: number; sec: number }> = {};
 
-  const handleUpdate = async (recordId: string, userId: string, userName: string) => {
+    records.forEach((r) => {
+      parts[r.wodPart] = r;
+      times[r.wodPart] = {
+        min: Math.floor((r.finishTime ?? 0) / 60),
+        sec: (r.finishTime ?? 0) % 60,
+      };
+    });
+
+    setRecordParts(parts);
+    setFinishTimes(times);
+    setSelectedPart(records[0]?.wodPart ?? "");
+  };
+  const handleUpdate = async (userId: string, userName: string, existingRecords: WorkoutRecord[]) => {
     if (!wod || !currentPart) return;
     setSubmitting(true);
     try {
-      const record: Omit<WorkoutRecord, "id"> = {
-        ...recordPart,
-        userId,
-        userName,
-        wodId: wod.id,
-        wodName: wod.title,
-        wodPart: selectedPart,
-        wodType: currentPart.type,
-        completedAt: recordPart.completedAt ?? wod.date,
-        isDNF: recordPart.isDNF ?? false,
-        level: recordPart.level ?? "R'xd",
-        weights: recordPart.weights ?? [],
-        wodTeam: currentPart.isTeam,
-        partnerName: recordPart.partnerName ?? "",
-        partnerWeight: recordPart.partnerWeight ?? 0,
-        partnerDifferentWeight: recordPart.partnerDifferentWeight ?? false,
-        finishTime: finishMin * 60 + finishSec,
-        createdAt: recordPart.createdAt ?? null,
-      };
-      await updateWorkoutRecord(recordId, record);
+      for (const part of wod.parts) {
+        const partRecord = recordParts[part.part];
+        if (!partRecord) continue;
+        const partFinishMin = finishTimes[part.part]?.min ?? 0;
+        const partFinishSec = finishTimes[part.part]?.sec ?? 0;
+
+        const record: Omit<WorkoutRecord, "id"> = {
+          ...partRecord,
+          userId,
+          userName,
+          wodId: wod.id,
+          wodName: wod.title,
+          wodPart: part.part,
+          wodType: part.type,
+          completedAt: partRecord.completedAt ?? wod.date,
+          isDNF: partRecord.isDNF ?? false,
+          level: partRecord.level ?? "R'xd",
+          weights: partRecord.weights ?? [],
+          wodTeam: part.isTeam,
+          partnerName: partRecord.partnerName ?? "",
+          partnerWeight: partRecord.partnerWeight ?? 0,
+          partnerDifferentWeight: partRecord.partnerDifferentWeight ?? false,
+          finishTime: partFinishMin * 60 + partFinishSec,
+          createdAt: partRecord.createdAt ?? null,
+        };
+        const existing = existingRecords.find((r) => r.wodPart === part.part);
+        if (existing) {
+          await updateWorkoutRecord(existing.id, record);
+        } else {
+          await addWorkoutRecord(record);
+        }
+      }
       router.push("/record");
     } catch (error) {
       console.error(error);
@@ -169,5 +196,7 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
     handlePartChange,
     handleSubmit,
     handleUpdate,
+    initAllParts,
+    finishTimes,
   };
 };

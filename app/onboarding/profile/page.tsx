@@ -3,7 +3,7 @@
 import { useAuthGuard } from "@/hooks/auth/useAuthGuard";
 import { createUser } from "@/lib/firestore";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function OnboardingProfilePage() {
   const { user, loading } = useAuthGuard();
@@ -15,6 +15,14 @@ export default function OnboardingProfilePage() {
   const [weight, setWeight] = useState(0);
   const [height, setHeight] = useState(0);
   const [unit, setUnit] = useState<"kg" | "lb">("kg");
+
+  useEffect(() => {
+    // 뒤로가기 방지
+    window.history.pushState(null, "", window.location.href);
+    window.onpopstate = () => {
+      window.history.pushState(null, "", window.location.href);
+    };
+  }, []);
 
   const handleSubmit = async () => {
     if (!user) return;

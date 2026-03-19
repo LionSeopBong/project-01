@@ -3,9 +3,10 @@
 import HomeHeader from "@/app/components/ui/HomeHeader";
 import { useAuthGuard } from "@/hooks/auth/useAuthGuard";
 import { useRecordForm } from "@/hooks/record/useRecordForm";
+import { useUserInfo } from "@/hooks/user/useUserInfo";
 import { useWod } from "@/hooks/wod/useWod";
 import { LEVELS } from "@/lib/constants";
-import { getWorkoutRecord } from "@/lib/firestore";
+import { getMyWodRecords, getWorkoutRecord } from "@/lib/firestore";
 import { WorkoutRecord } from "@/types/wod";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -15,30 +16,25 @@ export default function MyRecordsEdit() {
   const params = useParams();
   const recordId = params.id as string;
   const [recordData, setRecordData] = useState<WorkoutRecord | null>(null);
-
+  const [allPartRecords, setAllPartRecords] = useState<WorkoutRecord[]>([]);
+  const { userInfo } = useUserInfo(user?.uid ?? "");
   useEffect(() => {
     if (!recordId) return;
-    getWorkoutRecord(recordId).then((data) => {
-      if (data) setRecordData(data);
+    getWorkoutRecord(recordId).then(async (data) => {
+      if (data) {
+        setRecordData(data);
+        const allRecords = await getMyWodRecords(data.userId, data.wodId);
+        setAllPartRecords(allRecords);
+      }
     });
   }, [recordId]);
 
   const { wod, wodLoading } = useWod(recordData?.wodId ?? "");
-  const {
-    selectedPart,
-    recordPart,
-    setRecordPart,
-    finishMin,
-    setFinishMin,
-    finishSec,
-    setFinishSec,
-    submitting,
-    currentPart,
-    handlePartChange,
-
-    handleUpdate,
-  } = useRecordForm(wod ?? null, recordData ?? undefined);
-
+  const { selectedPart, recordPart, setRecordPart, finishMin, setFinishMin, finishSec, setFinishSec, submitting, currentPart, handlePartChange, handleUpdate } =
+    useRecordForm(wod ?? null, recordData ?? undefined);
+  useEffect(() => {
+    if (!allPartRecords.length || !wod) return;
+  }, [allPartRecords, wod]);
   if (loading || wodLoading || !recordData) return <div className="min-h-screen bg-[#0a0a0a]" />;
 
   return (
@@ -57,8 +53,14 @@ export default function MyRecordsEdit() {
           <button
             key={part.part}
             onClick={() => handlePartChange(part.part)}
-            className={`px-5 py-2 rounded-xl text-sm font-black border transition 
-                ${selectedPart === part.part ? "bg-[#E63946] border-[#E63946] text-white" : "bg-zinc-800 border-zinc-700 text-zinc-400"}`}
+            disabled={part.part !== recordData?.wodPart} // ← 진입한 파트 외 비활성화
+            className={`px-5 py-2 rounded-xl text-sm font-black border transition ${
+              selectedPart === part.part
+                ? "bg-[#E63946] border-[#E63946] text-white"
+                : part.part !== recordData?.wodPart
+                  ? "bg-zinc-900 border-zinc-800 text-zinc-700 cursor-not-allowed" // ← 비활성화 스타일
+                  : "bg-zinc-800 border-zinc-700 text-zinc-400"
+            }`}
           >
             {part.part}
           </button>
@@ -431,7 +433,7 @@ export default function MyRecordsEdit() {
 
       {/*  제출 버튼 */}
       <button
-        onClick={() => handleUpdate(recordId, user?.uid ?? "", user?.displayName ?? "")}
+        onClick={() => handleUpdate(user?.uid ?? "", userInfo?.name ?? "", allPartRecords)}
         disabled={submitting}
         className="w-full py-4 mt-3 bg-[#E63946] rounded-xl text-white font-black text-lg tracking-wider uppercase disabled:opacity-50 transition"
       >
