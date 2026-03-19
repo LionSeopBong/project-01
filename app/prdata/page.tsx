@@ -77,6 +77,7 @@ export default function PRDataPage() {
       await fetchPrRecords();
       setSelectedExercise(null);
       setWeight(0);
+      setReps(0);
       setTimeHour(0);
       setTimeMin(0);
       setTimeSec(0);
