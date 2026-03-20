@@ -82,7 +82,7 @@ export const getLevelColor = (level: string) => {
       return "text-zinc-400";
   }
 };
-const getTimeAgo = (seconds: number) => {
+export const getTimeAgo = (seconds: number) => {
   const diff = Date.now() - seconds * 1000;
   const min = Math.floor(diff / 60000);
   const hour = Math.floor(diff / 3600000);

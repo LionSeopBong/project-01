@@ -16,7 +16,6 @@ export const useNotifications = (userId: string) => {
     // 실시간 구독 시작
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map((doc) => {
-        console.log("doc.data()", doc.data()); // ← 추가
         return { id: doc.id, ...doc.data() };
       }) as unknown as Notification[];
       setNotifications(data);

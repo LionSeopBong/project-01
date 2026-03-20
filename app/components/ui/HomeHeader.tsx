@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDumbbell, faFilePen, faHandFist, faUser, faGear, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { useNotifications } from "@/hooks/user/useNotifications";
-
+import { getTimeAgo } from "@/lib/utils";
 const menuItems = [
   { href: "/wod", label: "WOD", icon: faDumbbell },
   { href: "/record", label: "Record", icon: faFilePen },
@@ -94,12 +94,17 @@ export default function HomeHeader() {
             <div className="flex flex-col px-4 pt-4 gap-2 overflow-y-auto h-[calc(100%-80px)]">
               {notificationsLoading && <p className="text-zinc-500 text-sm text-center py-10">불러오는 중...</p>}
               {!notificationsLoading && notifications.length === 0 && <p className="text-zinc-500 text-sm text-center py-10">알림이 없어요</p>}
-              {notifications.map((notif) => (
-                <div key={notif.id} className={`p-3 rounded-xl text-sm transition ${notif.isRead ? "bg-zinc-900 text-zinc-500" : "bg-zinc-800 text-white"}`}>
-                  <p className="font-bold">{notif.message}</p>
-                  {notif.createdAt?.seconds != null ? new Date(notif.createdAt.seconds * 1000).toLocaleDateString("ko-KR") : "방금 전"}{" "}
-                </div>
-              ))}
+              {notifications.map((notif) => {
+                console.log("createdAt", notif.createdAt);
+                console.log("seconds", notif.createdAt?.seconds);
+                return (
+                  <div key={notif.id} className={`p-3 rounded-xl text-sm transition ${notif.isRead ? "bg-zinc-900 text-zinc-500" : "bg-zinc-800 text-white"}`}>
+                    <p className="font-bold">{notif.message}</p>
+                    {/* {notif.createdAt?.seconds != null ? new Date(notif.createdAt.seconds * 1000).toLocaleDateString("ko-KR") : "방금 전"} */}
+                    <p className="text-xs text-zinc-600 mt-1">{notif.createdAt?.seconds ? getTimeAgo(notif.createdAt.seconds) : "방금 전"}</p>{" "}
+                  </div>
+                );
+              })}
             </div>
           </div>
           {/* 버거 메뉴 */}
