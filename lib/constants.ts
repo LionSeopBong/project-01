@@ -48,17 +48,39 @@ export const PR_EXERCISES = [
 
 // 가중치 max 값은 kg으로 설정됨
 export const PR_RADAR_CONFIG = [
-  { subject: "Power", exercises: ["Snatch", "Clean", "Push Press", "Jerk", "Hang Clean", "Hang Snatch"], max: 450, inverse: false, valueType: "weight" },
-  { subject: "Strength", exercises: ["Back Squat", "Deadlift", "Front Squat", "Banch Press", "Shoulder Press"], max: 300, inverse: false, valueType: "weight" },
-  { subject: "Endurance", exercises: ["5km Run", "10km Run", "21km Run"], max: 1200, inverse: true, valueType: "time" },
+  {
+    subject: "Power",
+    exercises: ["Snatch", "Clean", "Push Press", "Jerk", "Hang Clean", "Hang Snatch"],
+    maleMax: 450,
+    femaleMax: 300,
+    inverse: false,
+    valueType: "weight",
+  },
+  {
+    subject: "Strength",
+    exercises: ["Back Squat", "Deadlift", "Front Squat", "Banch Press", "Shoulder Press"],
+    maleMax: 300,
+    femaleMax: 200,
+    inverse: false,
+    valueType: "weight",
+  },
+  {
+    subject: "Endurance",
+    exercises: ["5km Run", "10km Run", "21km Run"],
+    maleMax: 1200,
+    femaleMax: 1500,
+    inverse: true,
+    valueType: "time",
+  },
   {
     subject: "Skill",
     exercises: ["Pull-Up", "Chest-to-Bar", "Bar Muscle-Up", "Ring Muscle-Up", "Hand Stand Push-Up", "Wall Walk", "Hand Stand Walk"],
-    max: 30,
+    maleMax: 30,
+    femaleMax: 20,
     inverse: false,
     valueType: "reps",
   },
-  { subject: "Conditioning", exercises: ["Fran", "Grace", "Helen", "Isabel", "Jeckie"], max: 360, inverse: true, valueType: "time" },
+  { subject: "Conditioning", exercises: ["Fran", "Grace", "Helen", "Isabel", "Jeckie"], maleMax: 360, femaleMax: 480, inverse: true, valueType: "time" },
 ];
 
 export const POWER_WEIGHTS: Record<string, number> = {

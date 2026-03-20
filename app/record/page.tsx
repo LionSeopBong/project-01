@@ -14,6 +14,7 @@ import { useLeaderboard } from "@/hooks/record/useLeaderBoard";
 import { getResultText, getSortedRecords, getLevelColor } from "@/lib/utils";
 import { useMyPrRecords } from "@/hooks/record/useMyPrRecords";
 import AthleteRadar from "@/app/components/ui/AthleteRadar";
+import { useUserInfo } from "@/hooks/user/useUserInfo";
 
 export default function RecordPage() {
   // 로그인 확인
@@ -37,6 +38,8 @@ export default function RecordPage() {
   const gender = activeTab === "leaderboard_men" ? "male" : "female";
   // 레이더 차트 데이터
   const { prRecords } = useMyPrRecords(user?.uid ?? "");
+  // 레코드 데이터를 전달하기위해 유저 정보
+  const { userInfo } = useUserInfo(user?.uid ?? "");
 
   if (loading) return <div className="min-h-screen bg-[#0a0a0a]" />;
 
@@ -58,7 +61,7 @@ export default function RecordPage() {
         </div>
         {user && <AttendanceCalendar userId={user.uid} onDateClick={(date) => setSelectedDate(date)} />}
       </section>
-      <AthleteRadar prRecords={prRecords} />
+      <AthleteRadar prRecords={prRecords} gender={userInfo?.gender ?? "male"} />
       {/* 탭 */}
       <div className="flex gap-2 mt-3 mb-4">
         {[

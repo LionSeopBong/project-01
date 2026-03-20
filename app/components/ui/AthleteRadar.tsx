@@ -6,14 +6,15 @@ import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer } fro
 
 interface Props {
   prRecords: PrRecord[];
+  gender: string;
 }
 
-export default function AthleteRadar({ prRecords }: Props) {
+export default function AthleteRadar({ prRecords, gender }: Props) {
   // 운동별 점수 계산
-  const getExerciseScore = (exercise: string, max: number, inverse: boolean, valueType: string) => {
+  const getExerciseScore = (exercise: string, maleMax: number, femaleMax: number, inverse: boolean, valueType: string) => {
+    const max = gender === "male" ? maleMax : femaleMax;
     const records = prRecords.filter((r) => r.exercise === exercise);
     if (!records.length) return null;
-
     const best = records.reduce((best, cur) => {
       if (valueType === "time") return (cur.time ?? 0) < (best.time ?? 0) ? cur : best;
       if (valueType === "reps") return (cur.reps ?? 0) > (best.reps ?? 0) ? cur : best;
@@ -41,7 +42,7 @@ export default function AthleteRadar({ prRecords }: Props) {
   const getRadarScore = () => {
     return PR_RADAR_CONFIG.map((config) => {
       const scores = config.exercises
-        .map((exercise) => getExerciseScore(exercise, config.max, config.inverse, config.valueType))
+        .map((exercise) => getExerciseScore(exercise, config.maleMax, config.femaleMax, config.inverse, config.valueType))
         .filter((score): score is number => score !== null);
 
       if (scores.length === 0) return { subject: config.subject, score: 0 };
