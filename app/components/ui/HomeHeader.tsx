@@ -24,7 +24,6 @@ export default function HomeHeader() {
   const router = useRouter();
   const { userInfo } = useUserInfo(user?.uid ?? "");
 
-  // 알림 훅
   // 훅 추가
   const { notifications, notificationsLoading, unreadCount, readAll } = useNotifications(user?.uid ?? "");
   const [notifOpen, setNotifOpen] = useState(false);

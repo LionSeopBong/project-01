@@ -43,6 +43,7 @@ export const useComments = (wodId: string | undefined, userId: string | undefine
 
   const handleToggleLike = async (commentId: string, isLiked: boolean) => {
     if (!userId || !wodId) return;
+
     await toggleLike(commentId, userId, isLiked);
 
     if (!isLiked) {
@@ -54,7 +55,7 @@ export const useComments = (wodId: string | undefined, userId: string | undefine
           type: "comment_like",
           message: `누군가 회원님의 댓글을 좋아해를 눌렀어요 ❤️`,
           isRead: false,
-          createdAt: null,
+          // createdAt: null,
           link: "/wod",
         });
       }

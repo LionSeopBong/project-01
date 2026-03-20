@@ -83,7 +83,7 @@ export default function AdminWodPage() {
             type: "wod_registered",
             message: `오늘의 WOD가 등록되었어요! 📋`,
             isRead: false,
-            createdAt: null,
+            // createdAt: null,
             link: "/wod",
           }),
         ),

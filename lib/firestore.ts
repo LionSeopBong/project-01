@@ -83,11 +83,11 @@ export const getMyWodRecords = async (userId: string, wodId: string): Promise<Wo
 
 // 댓글 등록
 export const addComment = async (comment: Omit<WodComment, "id">) => {
-  const ref = await addDoc(collection(db, "comments"), {
-    ...comment,
-    createdAt: Timestamp.now(),
+  const { createdAt, ...rest } = comment;
+  await addDoc(collection(db, "comments"), {
+    ...rest,
+    createdAt: Timestamp.now(), // ← 수정
   });
-  return ref.id;
 };
 // 댓글 삭제
 export const deleteComments = async (CommentID: string) => {
@@ -207,7 +207,13 @@ export const markAllNotificationsRead = async (userId: string) => {
 
 // 알림 생성
 export const createNotification = async (data: Omit<Notification, "id">) => {
-  await addDoc(collection(db, "notifications"), data);
+  const { createdAt, ...rest } = data;
+  const now = Timestamp.now();
+  console.log("Timestamp.now()", now); // ← 추가
+  await addDoc(collection(db, "notifications"), {
+    ...rest,
+    createdAt: now,
+  });
 };
 // 전체 유저 알림
 export const getAllUsers = async (): Promise<User[]> => {

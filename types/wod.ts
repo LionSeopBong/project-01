@@ -128,6 +128,6 @@ export interface Notification {
   type: "wod_registered" | "comment_like" | "comment_reply";
   message: string;
   isRead: boolean;
-  createdAt: any;
+  createdAt?: any;
   link?: string; // 클릭 시 이동할 경로
 }

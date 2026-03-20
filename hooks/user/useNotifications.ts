@@ -1,25 +1,31 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Notification } from "@/types/wod";
-import { getNotifications, markAllNotificationsRead } from "@/lib/firestore";
+import { markAllNotificationsRead } from "@/lib/firestore";
+import { db } from "@/lib/firebase";
+import { collection, query, where, orderBy, onSnapshot } from "firebase/firestore";
 
 export const useNotifications = (userId: string) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [notificationsLoading, setNotificationsLoading] = useState(false);
-
-  const fetchNotifications = useCallback(async () => {
-    if (!userId) return;
-    setNotificationsLoading(true);
-    try {
-      const data = await getNotifications(userId);
-      setNotifications(data);
-    } finally {
-      setNotificationsLoading(false);
-    }
-  }, [userId]);
+  const [notificationsLoading, setNotificationsLoading] = useState(true);
 
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    if (!userId) return;
+
+    const q = query(collection(db, "notifications"), where("userId", "==", userId), orderBy("createdAt", "desc"));
+
+    // 실시간 구독 시작
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => {
+        console.log("doc.data()", doc.data()); // ← 추가
+        return { id: doc.id, ...doc.data() };
+      }) as unknown as Notification[];
+      setNotifications(data);
+      setNotificationsLoading(false);
+    });
+
+    // 컴포넌트 언마운트 시 구독 해제
+    return () => unsubscribe();
+  }, [userId]);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
@@ -28,5 +34,5 @@ export const useNotifications = (userId: string) => {
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
   };
 
-  return { notifications, notificationsLoading, unreadCount, readAll, refetch: fetchNotifications };
+  return { notifications, notificationsLoading, unreadCount, readAll };
 };
