@@ -27,10 +27,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="kr">
-      <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <AuthProvider>
-          <LayoutContent>{children}</LayoutContent>
-        </AuthProvider>
+      <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}>
+        <div className="mx-auto max-w-[375px] min-h-screen bg-[#0a0a0a] relative">
+          <AuthProvider>
+            <LayoutContent>{children}</LayoutContent>
+          </AuthProvider>
+        </div>
       </body>
     </html>
   );
