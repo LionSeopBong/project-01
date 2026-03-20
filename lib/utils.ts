@@ -82,3 +82,14 @@ export const getLevelColor = (level: string) => {
       return "text-zinc-400";
   }
 };
+const getTimeAgo = (seconds: number) => {
+  const diff = Date.now() - seconds * 1000;
+  const min = Math.floor(diff / 60000);
+  const hour = Math.floor(diff / 3600000);
+  const day = Math.floor(diff / 86400000);
+
+  if (min < 1) return "방금 전";
+  if (min < 60) return `${min}분 전`;
+  if (hour < 24) return `${hour}시간 전`;
+  return `${day}일 전`;
+};

@@ -97,7 +97,7 @@ export default function HomeHeader() {
               {notifications.map((notif) => (
                 <div key={notif.id} className={`p-3 rounded-xl text-sm transition ${notif.isRead ? "bg-zinc-900 text-zinc-500" : "bg-zinc-800 text-white"}`}>
                   <p className="font-bold">{notif.message}</p>
-                  <p className="text-xs text-zinc-600 mt-1">{new Date(notif.createdAt?.seconds * 1000).toLocaleDateString("ko-KR")}</p>
+                  {notif.createdAt?.seconds != null ? new Date(notif.createdAt.seconds * 1000).toLocaleDateString("ko-KR") : "방금 전"}{" "}
                 </div>
               ))}
             </div>

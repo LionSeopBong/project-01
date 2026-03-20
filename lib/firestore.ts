@@ -209,7 +209,6 @@ export const markAllNotificationsRead = async (userId: string) => {
 export const createNotification = async (data: Omit<Notification, "id">) => {
   const { createdAt, ...rest } = data;
   const now = Timestamp.now();
-  console.log("Timestamp.now()", now); // ← 추가
   await addDoc(collection(db, "notifications"), {
     ...rest,
     createdAt: now,
