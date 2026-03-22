@@ -120,6 +120,8 @@ export interface PrRecord {
   unit: string;
   recordedAt: string;
   createdAt: any;
+  distance?: number;
+  distanceUnit?: "m" | "ft";
 }
 // 알림타입
 export interface Notification {

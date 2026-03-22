@@ -81,7 +81,7 @@ export default function AdminWodPage() {
           createNotification({
             userId: u.id,
             type: "wod_registered",
-            message: `오늘의 WOD가 등록되었어요! 📋`,
+            message: `오늘의 WOD가 등록되었어요!`,
             isRead: false,
             // createdAt: null,
             link: "/wod",

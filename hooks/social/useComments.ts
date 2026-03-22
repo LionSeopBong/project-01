@@ -53,7 +53,7 @@ export const useComments = (wodId: string | undefined, userId: string | undefine
         await createNotification({
           userId: comment.userId,
           type: "comment_like",
-          message: `누군가 회원님의 댓글을 좋아해를 눌렀어요 ❤️`,
+          message: `누군가 회원님의 댓글을 좋아요를 눌렀어요 ❤️`,
           isRead: false,
           // createdAt: null,
           link: "/wod",

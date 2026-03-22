@@ -175,7 +175,10 @@ export const updateUser = async (uid: string, data: Partial<User>) => {
 export const addPrRecord = async (record: Omit<PrRecord, "id">) => {
   await addDoc(collection(db, "prRecords"), record);
 };
-
+// PR 기록 하나만 등록하도록 업데이트
+export const updatePrRecord = async (id: string, data: Partial<PrRecord>) => {
+  await updateDoc(doc(db, "prRecords", id), data);
+};
 // PR 기록 조회
 export const getMyPrRecords = async (userId: string): Promise<PrRecord[]> => {
   const q = query(collection(db, "prRecords"), where("userId", "==", userId), orderBy("recordedAt", "desc"));
