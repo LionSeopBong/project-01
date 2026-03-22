@@ -28,6 +28,15 @@ export default function PRDataPage() {
   const selectedCategory = PR_EXERCISES.find((e) => e.name === selectedExercise)?.category;
   const categories = [...new Set(PR_EXERCISES.map((e) => e.category))];
 
+  const isValid = () => {
+    if (!selectedExercise) return false;
+    if (selectedCategory === "Strength" || selectedCategory === "Power") return weight > 0;
+    if (selectedCategory === "Skill") return reps > 0;
+    if (selectedCategory === "Endurance" || selectedCategory === "Conditioning") {
+      return timeHour > 0 || timeMin > 0 || timeSec > 0;
+    }
+    return false;
+  };
   const fetchPrRecords = async () => {
     if (!user) return;
     const data = await getMyPrRecords(user.uid);
@@ -237,6 +246,7 @@ export default function PRDataPage() {
               <input
                 type="date"
                 value={recordedAt}
+                max={getLocalToday()}
                 onChange={(e) => setRecordedAt(e.target.value)}
                 className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#E63946]"
               />
@@ -320,7 +330,7 @@ export default function PRDataPage() {
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={submitting}
+                disabled={submitting || !isValid()}
                 className="flex-1 py-3 bg-[#E63946] rounded-xl text-white font-black disabled:opacity-50 transition"
               >
                 {submitting ? "저장 중..." : "저장"}

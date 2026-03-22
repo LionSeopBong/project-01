@@ -219,3 +219,14 @@ export const getAllUsers = async (): Promise<User[]> => {
   const snapshot = await getDocs(collection(db, "users"));
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as unknown as User[];
 };
+// 알림 단건 삭제
+export const deleteNotification = async (id: string) => {
+  await deleteDoc(doc(db, "notifications", id));
+};
+
+// 읽은 알림 전체 삭제
+export const deleteReadNotifications = async (userId: string) => {
+  const notifications = await getNotifications(userId);
+  const read = notifications.filter((n) => n.isRead);
+  await Promise.all(read.map((n) => deleteNotification(n.id)));
+};

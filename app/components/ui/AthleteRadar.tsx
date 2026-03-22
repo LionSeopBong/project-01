@@ -22,7 +22,10 @@ export default function AthleteRadar({ prRecords, gender }: Props) {
     });
 
     let value = valueType === "time" ? (best.time ?? 0) : valueType === "reps" ? (best.reps ?? 0) : (best.weight ?? 0);
-
+    // ← lb → kg 변환 추가
+    if (valueType === "weight" && best.unit === "lb") {
+      value = value * 0.453592;
+    }
     // 가중치 적용
     if (valueType === "reps" && SKILL_WEIGHTS[exercise]) {
       value = value * SKILL_WEIGHTS[exercise];

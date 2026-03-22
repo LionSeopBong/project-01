@@ -1,7 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useUserInfo } from "@/hooks/user/useUserInfo";
 import { logOut } from "@/lib/auth";
-import { getUser } from "@/lib/firestore";
+import { deleteReadNotifications, getUser } from "@/lib/firestore";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -83,11 +83,21 @@ export default function HomeHeader() {
             {/* 패널 헤더 */}
             <div className="flex items-center justify-between px-6 pt-10 pb-4 border-b border-zinc-800">
               <h2 className="text-white font-black text-lg">알림</h2>
-              <button onClick={() => setNotifOpen(false)} className="text-zinc-400 hover:text-white transition">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={async () => {
+                    await deleteReadNotifications(user?.uid ?? "");
+                  }}
+                  className="text-zinc-500 hover:text-red-500 text-xs transition"
+                >
+                  읽은 알림 삭제
+                </button>
+                <button onClick={() => setNotifOpen(false)} className="text-zinc-400 font-bold hover:text-white transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             {/* 알림 목록 */}

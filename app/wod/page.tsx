@@ -11,6 +11,7 @@ import { useIsAdmin } from "@/hooks/auth/useIsAdmin";
 import ReactDatePicker from "react-datepicker";
 import { ko } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
 
 const formatDate = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
@@ -34,6 +35,9 @@ export default function WodPage() {
     wod?.id,
     user?.uid,
   );
+  const nextDate = format(addDays(currentDate, 1), "yyyy-MM-dd");
+  const { wod: nextWod } = useWodByDate(nextDate);
+  const canGoNext = !!nextWod;
 
   // wod 변경시 댓글 불러오기
   useEffect(() => {
@@ -78,9 +82,9 @@ export default function WodPage() {
           />
 
           <button
-            onClick={() => !isToday && setCurrentDate(addDays(currentDate, 1))}
+            onClick={() => canGoNext && setCurrentDate(addDays(currentDate, 1))}
             className={`flex items-center gap-1 text-sm font-bold transition ${
-              isToday ? "text-zinc-700 cursor-not-allowed" : "text-zinc-400 hover:text-white"
+              canGoNext ? "text-zinc-400 hover:text-white" : "text-zinc-700 cursor-not-allowed"
             }`}
           >
             Next →
