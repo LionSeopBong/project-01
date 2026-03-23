@@ -331,7 +331,7 @@ export default function AddRecordPage() {
               <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">Total Reps</label>
               <input
                 type="number"
-                value={recordPart.totalReps ?? 0}
+                value={recordPart.totalReps ?? ""}
                 onChange={(e) => setRecordPart({ ...recordPart, totalReps: Number(e.target.value) })}
                 className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-[#E63946]"
               />

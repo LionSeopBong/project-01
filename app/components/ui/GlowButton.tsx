@@ -14,7 +14,7 @@ export default function GlowButton({ children, onClick, className }: GlowButtonP
 
          .start-btn {
           position: relative;
-          padding: 22px 80px;
+          padding: 20px 60px;
           font-family: 'Bebas Neue', Impact, sans-serif;
           font-size: 2.2rem;
           letter-spacing: 0.15em;
@@ -34,17 +34,22 @@ export default function GlowButton({ children, onClick, className }: GlowButtonP
             inset 0 -3px 6px rgba(0,0,0,0.4);
         }
 
-        .start-btn::before {
-          content: '';
-          position: absolute;
-          top: 6px;
-          left: 18px;
-          right: 18px;
-          height: 38%;
-          background: linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 100%);
-          border-radius: 20px 20px 20px 20px;
-          pointer-events: none;
-        }
+       .start-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 45%;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.35) 0%,
+    rgba(255,255,255,0.15) 40%,
+    transparent 100%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
 
         /* 바닥 반사광 */
         .start-btn::after {
