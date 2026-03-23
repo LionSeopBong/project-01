@@ -6,7 +6,7 @@ import { useAuthGuard } from "@/hooks/auth/useAuthGuard";
 import { useDate } from "@/hooks/user/useDate";
 import { useMyRecords } from "@/hooks/record/useMyRecords";
 import { deleteWorkoutRecord } from "@/lib/firestore";
-import { getLocalToday } from "@/lib/utils";
+import { getLocalToday, getEffectiveLevel } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useWodByDate } from "@/hooks/wod/useWodByDate";
@@ -128,7 +128,9 @@ export default function RecordPage() {
                 <span className="text-xs font-bold text-[#E63946] border border-[#E63946] px-2 py-0.5 rounded-full">{record.wodPart}</span>
                 <span className="text-xs font-bold text-[#E63946] border border-[#E63946] px-2 py-0.5 rounded-full">{record.wodType}</span>
                 {record.wodTeam && <span className="text-xs font-bold text-[#E63946] border border-[#E63946] px-2 py-0.5 rounded-full">Team</span>}
-                <span className="text-xs font-bold text-[#E63946] border border-[#E63946] px-2 py-0.5 rounded-full">{record.level}</span>
+                <span className="text-xs font-bold text-[#E63946] border border-[#E63946] px-2 py-0.5 rounded-full">
+                  {getEffectiveLevel(record, selectedWod)}
+                </span>
               </div>
 
               {/* 결과 */}
@@ -178,28 +180,28 @@ export default function RecordPage() {
               <div key={level}>
                 <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">{level}</h3>
                 <div className="space-y-2">
-                  {allRecords.map((record, index) => (
-                    <div key={record.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3 flex items-center gap-3">
-                      {/* 순위 */}
-                      <span
-                        className={`text-sm font-black w-6 text-center ${
-                          index === 0 ? "text-yellow-400" : index === 1 ? "text-zinc-300" : index === 2 ? "text-amber-600" : "text-zinc-600"
-                        }`}
-                      >
-                        {index + 1}
-                      </span>
-
-                      {/* 이름 */}
-                      <span className="text-white font-bold text-sm flex-1">{record.userName}</span>
-
-                      {/* 결과 */}
-                      {}
-
-                      <span className={`text-sm font-black ${record.isDNF ? "text-zinc-400" : "text-white"}`}>
-                        <span className={`text-sm ${getLevelColor(record.level)}`}>{record.level}</span>&nbsp;{getResultText(record)}
-                      </span>
-                    </div>
-                  ))}
+                  {allRecords.map((record, index) => {
+                    const effectiveLevel = getEffectiveLevel(record, selectedWod);
+                    return (
+                      <div key={record.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3 flex items-center gap-3">
+                        {/* 순위 */}
+                        <span
+                          className={`text-sm font-black w-6 text-center ${
+                            index === 0 ? "text-yellow-400" : index === 1 ? "text-zinc-300" : index === 2 ? "text-amber-600" : "text-zinc-600"
+                          }`}
+                        >
+                          {index + 1}
+                        </span>
+                        {/* 이름 */}
+                        <span className="text-white font-bold text-sm flex-1">{record.userName}</span>
+                        {/* 결과 */}
+                        <span className={`text-sm font-black ${record.isDNF ? "text-zinc-400" : "text-white"}`}>
+                          <span className={`text-sm ${getLevelColor(effectiveLevel)}`}>{effectiveLevel}</span>
+                          &nbsp;{getResultText(record)}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );

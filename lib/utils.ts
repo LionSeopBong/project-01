@@ -1,4 +1,4 @@
-import { WorkoutRecord } from "@/types/wod";
+import { Wod, WorkoutRecord } from "@/types/wod";
 
 // 로컬 시간 기준 오늘 날짜 (YYYY-MM-DD)
 export const getLocalToday = (): string => {
@@ -34,6 +34,10 @@ export const getSortedRecords = (records: WorkoutRecord[]) => {
         if (a.hasTotalRepsOnly) return (b.totalReps ?? 0) - (a.totalReps ?? 0);
         return (a.failCount ?? 0) - (b.failCount ?? 0);
 
+      case "Every":
+        const aLastWeight = a.weights?.at(-1)?.weight ?? 0;
+        const bLastWeight = b.weights?.at(-1)?.weight ?? 0;
+        return bLastWeight - aLastWeight;
       default:
         return 0;
     }
@@ -64,6 +68,10 @@ export const getResultText = (record: WorkoutRecord) => {
       if (record.hasTotalRepsOnly) return `${record.totalReps ?? 0} reps`;
       return `Fail ${record.failCount ?? 0}`;
 
+    case "Every":
+      const lastWeight = record.weights?.at(-1);
+      if (!lastWeight) return "-";
+      return `${lastWeight.weight} ${lastWeight.unit}`;
     default:
       return record.memo ?? "-";
   }
@@ -92,4 +100,22 @@ export const getTimeAgo = (seconds: number) => {
   if (min < 60) return `${min}분 전`;
   if (hour < 24) return `${hour}시간 전`;
   return `${day}일 전`;
+};
+// 기록 레벨 계산
+export const getEffectiveLevel = (record: WorkoutRecord, wod: Wod | null) => {
+  if (!wod) return record.level;
+
+  const part = wod.parts.find((p) => p.part === record.wodPart);
+  if (!part) return record.level;
+
+  // 성별에 따른 권장 무게 가져오기
+  const recommendedWeight = record.gender === "male" ? (part.weights[0]?.maleWeight ?? 0) : (part.weights[0]?.femaleWeight ?? 0);
+
+  // 실제 사용 무게
+  const usedWeight = record.weights[0]?.weight ?? 0;
+
+  // 권장 무게보다 낮으면 Scale 로 표시
+  if (usedWeight < recommendedWeight) return "Scale";
+
+  return record.level;
 };
