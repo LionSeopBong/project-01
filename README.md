@@ -83,7 +83,7 @@
 ```
 
 ## 전체 화면 스크린샷
-
+<img width="1280" height="720" alt="Image" src="https://github.com/user-attachments/assets/58b1f5ce-6a9b-40f2-89f7-7680ed823fd6" />
 ## 주요 기능
 
 ### 회원관리
