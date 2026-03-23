@@ -23,22 +23,24 @@
 
 ## 🎥 주요 기능 시연
 
-### WOD 확인 및 기록 등록
+### 시작 및 로그인 홈 및 와드 확인
 
-![wod-flow]
 ![Image](https://github.com/user-attachments/assets/b8aaa998-1dea-4534-870c-9f7cdc14b168)
 
 ---
 
-### 오늘 기록 등록 및 레이더 차트 분석
+### 오늘 와드 기록 등록 및 랭킹 확인
 
-![radar]
-
+![Image](https://github.com/user-attachments/assets/474b094e-2a11-4302-8e3c-a8dca8fd0ee7)
 ---
 
-### PR Board 관리
+### PR Board 관리 및 기록 등록 그래프 확인
 
-![prboard](./screenshots/prboard.gif)
+![Image](https://github.com/user-attachments/assets/57a1bbba-6386-4f04-b5bd-d86fc9824565)
+
+### Profile 및 개인정보 수정, 로그아웃
+
+![Image](https://github.com/user-attachments/assets/5e7501b3-3197-4d2a-a227-084f4f1e76a6)
 
 ## 📌 프로젝트 소개
 
