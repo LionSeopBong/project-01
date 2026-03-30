@@ -1,8 +1,8 @@
 import { useCalendar } from "@/hooks/user/useCalendar";
 import { getLocalToday } from "@/lib/utils";
 
-export default function AttendanceCalendar({ userId, onDateClick }: { userId: string; onDateClick?: (date: string) => void }) {
-  const { attendance } = useCalendar(userId);
+export default function AttendanceCalendar({ userId, gymId, onDateClick }: { userId: string; gymId: string; onDateClick?: (date: string) => void }) {
+  const { attendance } = useCalendar(userId, gymId);
 
   const now = new Date();
   const year = now.getFullYear();

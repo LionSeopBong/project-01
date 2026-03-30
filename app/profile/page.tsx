@@ -3,20 +3,47 @@
 import HomeHeader from "@/app/components/ui/HomeHeader";
 import { useAuthGuard } from "@/hooks/auth/useAuthGuard";
 import { useUserInfo } from "@/hooks/user/useUserInfo";
+import { useGymManager } from "@/hooks/user/useGymManager";
 import { updateUser } from "@/lib/firestore";
 import { logOut } from "@/lib/auth";
 import { User } from "@/types/wod";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState } from "react";
+import { GYM_CODE_LENGTH } from "@/lib/constants";
 
 export default function ProfilePage() {
   const { user, loading } = useAuthGuard();
   const { userInfo, userLoading, refetch } = useUserInfo(user?.uid ?? "");
   const router = useRouter();
+
+  // 프로필 수정
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<User>>({});
   const [submitting, setSubmitting] = useState(false);
+
+  // 체육관 관리 훅
+  const {
+    gyms,
+    gymsLoading,
+    gymMode,
+    setGymMode,
+    cancelMode,
+    joinCode,
+    setJoinCode,
+    joinLoading,
+    handleJoin,
+    newGymName,
+    setNewGymName,
+    newGymCode,
+    setNewGymCode,
+    newGymImagePreview,
+    handleImageChange,
+    imageInputRef,
+    createLoading,
+    handleCreate,
+    handleSwitch,
+  } = useGymManager(user?.uid ?? "", userInfo?.currentGymId ?? "", refetch);
 
   const handleEdit = () => {
     setEditData({
@@ -38,8 +65,6 @@ export default function ProfilePage() {
       setIsEditing(false);
     } catch (error) {
       console.error(error);
-      console.error("저장 실패 오류", error); // ← error 내용 확인
-
       alert("저장 실패");
     } finally {
       setSubmitting(false);
@@ -62,11 +87,10 @@ export default function ProfilePage() {
         </h1>
       </div>
 
-      {/* 정보 */}
+      {/* 프로필 정보 */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4 mb-6">
         {!isEditing ? (
           <>
-            {/* 프로필 이미지 + 이름 */}
             <div className="flex items-center gap-4 mb-8">
               {user?.photoURL && <Image src={user.photoURL} alt="profile" width={64} height={64} className="rounded-full" />}
               <div>
@@ -74,7 +98,6 @@ export default function ProfilePage() {
                 <p className="text-zinc-500 text-sm">{user?.email}</p>
               </div>
             </div>
-            {/* 보기 모드 */}
             <div className="flex justify-between items-center">
               <span className="text-zinc-500 text-sm">성별</span>
               <span className="text-white font-bold">{userInfo?.gender === "male" ? "남" : "여"}</span>
@@ -99,8 +122,6 @@ export default function ProfilePage() {
           </>
         ) : (
           <>
-            {/* 수정 모드 */}
-            {/* 이름 */}
             <div>
               <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">닉네임</label>
               <input
@@ -110,7 +131,6 @@ export default function ProfilePage() {
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#E63946]"
               />
             </div>
-            {/* 성별 */}
             <div>
               <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">성별</label>
               <div className="flex gap-2">
@@ -130,8 +150,6 @@ export default function ProfilePage() {
                 ))}
               </div>
             </div>
-
-            {/* 단위 */}
             <div>
               <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">단위</label>
               <div className="flex gap-2">
@@ -148,8 +166,6 @@ export default function ProfilePage() {
                 ))}
               </div>
             </div>
-
-            {/* 몸무게 */}
             <div>
               <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">몸무게 ({editData.unit})</label>
               <input
@@ -159,8 +175,6 @@ export default function ProfilePage() {
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#E63946]"
               />
             </div>
-
-            {/* 키 */}
             <div>
               <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">키 (cm)</label>
               <input
@@ -170,7 +184,6 @@ export default function ProfilePage() {
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#E63946]"
               />
             </div>
-
             <div className="flex gap-2">
               <button
                 onClick={() => setIsEditing(false)}
@@ -188,6 +201,153 @@ export default function ProfilePage() {
             </div>
           </>
         )}
+      </div>
+
+      {/* ── 체육관 섹션 ── */}
+      <div className="mb-6">
+        <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">박스</h2>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-3">
+          {/* 가입된 체육관 목록 */}
+          {gymsLoading ? (
+            <div className="text-zinc-500 text-sm text-center py-4">불러오는 중...</div>
+          ) : gyms.length === 0 ? (
+            <p className="text-zinc-600 text-sm text-center py-2">가입된 체육관이 없어요</p>
+          ) : (
+            gyms.map((gym) => {
+              const isActive = gym.id === userInfo?.currentGymId;
+              return (
+                <button
+                  key={gym.id}
+                  onClick={() => handleSwitch(gym.id)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition ${
+                    isActive ? "border-[#E63946] bg-[#E63946]/10" : "border-zinc-700 bg-zinc-800 hover:border-zinc-500"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {gym.imageUrl ? (
+                      <img src={gym.imageUrl} alt={gym.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-zinc-700 flex items-center justify-center flex-shrink-0">
+                        <span className="text-lg">🏋️</span>
+                      </div>
+                    )}
+                    <div className="text-left">
+                      <p className={`text-sm font-black ${isActive ? "text-white" : "text-zinc-400"}`}>{gym.name}</p>
+                      <p className="text-xs text-zinc-600">코드: {gym.code}</p>
+                    </div>
+                  </div>
+                  {isActive && <span className="text-xs text-[#E63946] font-bold bg-[#E63946]/10 px-2 py-1 rounded-lg">현재</span>}
+                </button>
+              );
+            })
+          )}
+
+          {/* 가입 폼 */}
+          {gymMode === "join" && (
+            <div className="space-y-3 pt-2 border-t border-zinc-800">
+              <label className="text-xs text-zinc-500 uppercase tracking-widest block">체육관 코드 입력</label>
+              <input
+                type="text"
+                value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                maxLength={GYM_CODE_LENGTH}
+                placeholder={`${GYM_CODE_LENGTH}자리 코드`}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white uppercase tracking-widest text-center text-lg font-black placeholder-zinc-600 focus:outline-none focus:border-[#E63946] transition"
+              />
+              <div className="flex gap-2">
+                <button onClick={cancelMode} className="flex-1 py-2.5 border border-zinc-700 rounded-xl text-zinc-400 text-sm font-bold transition">
+                  취소
+                </button>
+                <button
+                  onClick={handleJoin}
+                  disabled={joinLoading || joinCode.length !== GYM_CODE_LENGTH}
+                  className="flex-1 py-2.5 bg-[#E63946] rounded-xl text-white text-sm font-black disabled:opacity-30 transition"
+                >
+                  {joinLoading ? "가입 중..." : "가입하기"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 생성 폼 */}
+          {gymMode === "create" && (
+            <div className="space-y-3 pt-2 border-t border-zinc-800">
+              {/* 체육관 이미지 */}
+              <div>
+                <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">체육관 로고 (선택)</label>
+                <input type="file" accept="image/*" ref={imageInputRef} onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)} className="hidden" />
+                <button
+                  onClick={() => imageInputRef.current?.click()}
+                  className="w-full h-24 border-2 border-dashed border-zinc-700 rounded-xl flex items-center justify-center gap-3 hover:border-[#E63946] transition overflow-hidden"
+                >
+                  {newGymImagePreview ? (
+                    <img src={newGymImagePreview} alt="preview" className="w-full h-full object-cover rounded-xl" />
+                  ) : (
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-2xl">📷</span>
+                      <span className="text-zinc-500 text-xs">이미지 선택</span>
+                    </div>
+                  )}
+                </button>
+              </div>
+              <div>
+                <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">체육관 이름</label>
+                <input
+                  type="text"
+                  value={newGymName}
+                  onChange={(e) => setNewGymName(e.target.value)}
+                  placeholder="ex) CrossFit 강남"
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-[#E63946] transition"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">초대 코드 ({GYM_CODE_LENGTH}자리)</label>
+                <input
+                  type="text"
+                  value={newGymCode}
+                  onChange={(e) => setNewGymCode(e.target.value.toUpperCase())}
+                  maxLength={GYM_CODE_LENGTH}
+                  placeholder="ex) ABC123"
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white uppercase tracking-widest text-center text-lg font-black placeholder-zinc-600 focus:outline-none focus:border-[#E63946] transition"
+                />
+                <p className="text-xs text-zinc-600 mt-1">멤버들이 이 코드로 가입해요</p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={cancelMode} className="flex-1 py-2.5 border border-zinc-700 rounded-xl text-zinc-400 text-sm font-bold transition">
+                  취소
+                </button>
+                <button
+                  onClick={handleCreate}
+                  disabled={createLoading || !newGymName.trim() || newGymCode.length !== GYM_CODE_LENGTH}
+                  className="flex-1 py-2.5 bg-[#E63946] rounded-xl text-white text-sm font-black disabled:opacity-30 transition"
+                >
+                  {createLoading ? "생성 중..." : "생성하기"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 액션 버튼 */}
+          {gymMode === "idle" && (
+            <div className="flex gap-2 pt-2 border-t border-zinc-800">
+              <button
+                onClick={() => setGymMode("join")}
+                className="flex-1 py-2.5 border border-zinc-700 rounded-xl text-zinc-400 text-sm font-bold hover:border-[#E63946] hover:text-[#E63946] transition"
+              >
+                + 박스 가입
+              </button>
+              {/* master 만 체육관 생성 가능 */}
+              {userInfo?.role === "master" && (
+                <button
+                  onClick={() => setGymMode("create")}
+                  className="flex-1 py-2.5 border border-zinc-700 rounded-xl text-zinc-400 text-sm font-bold hover:border-[#E63946] hover:text-[#E63946] transition"
+                >
+                  + 박스 생성
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 로그아웃 */}

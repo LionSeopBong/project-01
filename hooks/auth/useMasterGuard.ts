@@ -3,11 +3,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { getUser } from "@/lib/firestore";
 
-// 관리자 여부 확인 + 체육관 가입 여부 확인
-export const useAdminGuard = () => {
+// master 전용 가드 - master role만 접근 가능
+export const useMasterGuard = () => {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isMaster, setIsMaster] = useState(false);
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
@@ -21,30 +21,27 @@ export const useAdminGuard = () => {
     const check = async () => {
       const userData = await getUser(user.uid);
 
-      // 유저 데이터 없음 → 온보딩 처음부터
       if (!userData) {
         router.push("/onboarding/profile");
         return;
       }
 
-      // 체육관 미가입 → 체육관 가입 단계로
       if (!userData.currentGymId) {
         router.push("/onboarding/gym");
         return;
       }
 
-      // 관리자 아님 → 홈으로
-      if (userData.role !== "admin" && userData.role !== "master") {
+      if (userData.role !== "master") {
         router.push("/home");
         return;
       }
 
-      setIsAdmin(true);
+      setIsMaster(true);
       setChecking(false);
     };
 
     check();
   }, [user, loading]);
 
-  return { isAdmin, checking };
+  return { isMaster, checking };
 };

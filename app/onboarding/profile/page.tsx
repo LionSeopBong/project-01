@@ -4,6 +4,7 @@ import { useAuthGuard } from "@/hooks/auth/useAuthGuard";
 import { createUser } from "@/lib/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+const CODE_LENGTH = 6;
 
 export default function OnboardingProfilePage() {
   const { user, loading } = useAuthGuard();
@@ -37,8 +38,10 @@ export default function OnboardingProfilePage() {
         unit,
         profileImage: user.photoURL ?? "",
         role: "user",
+        currentGymId: "",
       });
-      router.push("/home");
+      // router.push("/home");
+      router.push("/onboarding/gym");
     } catch (error) {
       console.error(error);
       alert("저장 실패");

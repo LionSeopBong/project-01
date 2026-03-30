@@ -24,6 +24,7 @@ export interface Wod {
   id: string;
   date: string;
   title: string;
+  gymId: string;
   parts: WodPart[]; // A, B 파트 배열
   note: string;
   createdAt: any;
@@ -37,7 +38,8 @@ export interface User {
   height: number;
   profileImage: string;
   unit: string;
-  role: "admin" | "user";
+  role: "admin" | "user" | "master";
+  currentGymId: string;
   createdAt: any;
 }
 
@@ -70,6 +72,7 @@ export interface WorkoutRecord {
   // 공통
   id: string;
   userId: string;
+  gymId: string;
   userName: string;
   gender?: string;
   wodId: string;
@@ -132,4 +135,19 @@ export interface Notification {
   isRead: boolean;
   createdAt?: any;
   link?: string; // 클릭 시 이동할 경로
+}
+export interface Gym {
+  id: string;
+  name: string;
+  code: string;
+  adminId: string;
+  createdAt: string;
+  imageUrl?: string;
+}
+export interface GymMember {
+  id: string;
+  gymId: string;
+  userId: string;
+  role: "admin" | "member";
+  joinedAt: any;
 }

@@ -8,7 +8,7 @@ export const useIsAdmin = (userId: string | undefined) => {
     if (!userId) return;
     const check = async () => {
       const userData = await getUser(userId);
-      setIsAdmin(userData?.role === "admin");
+      setIsAdmin(userData?.role === "admin" || userData?.role === "master");
     };
     check();
   }, [userId]);

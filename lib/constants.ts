@@ -115,3 +115,5 @@ export const ENDURANCE_WIGHTS: Record<string, number> = {
   "10km Run": 2,
   "21km Run": 4,
 };
+// 박스초대 코드 자릿수
+export const GYM_CODE_LENGTH = 6;

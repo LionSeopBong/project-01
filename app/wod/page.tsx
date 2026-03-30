@@ -12,6 +12,7 @@ import ReactDatePicker from "react-datepicker";
 import { ko } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
+import { useUserInfo } from "@/hooks/user/useUserInfo";
 
 const formatDate = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
@@ -24,19 +25,20 @@ const addDays = (date: Date, days: number) => {
 export default function WodPage() {
   const { user, loading } = useAuthGuard();
   const router = useRouter();
-
+  const { userInfo } = useUserInfo(user?.uid ?? "");
+  const gymId = userInfo?.currentGymId ?? "";
   const [currentDate, setCurrentDate] = useState(new Date());
   const today = new Date();
   const isToday = formatDate(currentDate) === formatDate(today);
 
-  const { wod, wodLoading } = useWodByDate(formatDate(currentDate));
+  const { wod, wodLoading } = useWodByDate(formatDate(currentDate), gymId);
   const { isAdmin } = useIsAdmin(user?.uid);
   const { comments, commentText, setCommentText, submitting, fetchComments, handleAddComment, handleDeleteComment, handleToggleLike } = useComments(
     wod?.id,
     user?.uid,
   );
   const nextDate = format(addDays(currentDate, 1), "yyyy-MM-dd");
-  const { wod: nextWod } = useWodByDate(nextDate);
+  const { wod: nextWod } = useWodByDate(nextDate, gymId);
   const canGoNext = !!nextWod;
 
   // wod 변경시 댓글 불러오기

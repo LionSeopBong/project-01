@@ -25,21 +25,23 @@ export default function RecordPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"my" | "leaderboard_men" | "leaderboard_women">("my");
   const [selectedDate, setSelectedDate] = useState(getLocalToday());
+  // 레코드 데이터를 전달하기위해 유저 정보
+  const { userInfo } = useUserInfo(user?.uid ?? "");
+
+  const gymId = userInfo?.currentGymId ?? "";
   //나의 기록 불러오기
-  const { myRecords, recordsLoading, refetch } = useMyRecords(user?.uid ?? "");
-  const { wod: selectedWod } = useWodByDate(selectedDate);
+  const { myRecords, recordsLoading, refetch } = useMyRecords(user?.uid ?? "", gymId);
+  const { wod: selectedWod } = useWodByDate(selectedDate, gymId);
   const todayRecords = useMemo(() => {
     return myRecords.filter((record) => record.completedAt === selectedDate);
   }, [myRecords, selectedDate]);
   // 리더보드 state
   const [selectedPart, setSelectedPart] = useState("A");
-  const { leaderboard, leaderboardLoading } = useLeaderboard(selectedDate);
+  const { leaderboard, leaderboardLoading } = useLeaderboard(selectedDate, gymId);
 
   const gender = activeTab === "leaderboard_men" ? "male" : "female";
   // 레이더 차트 데이터
   const { prRecords } = useMyPrRecords(user?.uid ?? "");
-  // 레코드 데이터를 전달하기위해 유저 정보
-  const { userInfo } = useUserInfo(user?.uid ?? "");
 
   if (loading) return <div className="min-h-screen bg-[#0a0a0a]" />;
 
@@ -59,7 +61,7 @@ export default function RecordPage() {
           <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">이번 달</h2>
           <span className="text-xs text-zinc-500">{new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long" })}</span>
         </div>
-        {user && <AttendanceCalendar userId={user.uid} onDateClick={(date) => setSelectedDate(date)} />}
+        {user && <AttendanceCalendar userId={user.uid} gymId={gymId} onDateClick={(date) => setSelectedDate(date)} />}
       </section>
       <AthleteRadar prRecords={prRecords} gender={userInfo?.gender ?? "male"} />
       {/* 탭 */}

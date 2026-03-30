@@ -2,15 +2,15 @@ import { useState, useEffect } from "react";
 import { WorkoutRecord } from "@/types/wod";
 import { getMyRecords } from "@/lib/firestore";
 
-export const useMyRecords = (userId: string) => {
+export const useMyRecords = (userId: string, gymId: string) => {
   const [myRecords, setMyRecords] = useState<WorkoutRecord[]>([]);
   const [recordsLoading, setRecordsLoading] = useState(false);
 
   const fetchRecords = async () => {
-    if (!userId) return;
+    if (!userId || !gymId) return;
     setRecordsLoading(true);
     try {
-      const data = await getMyRecords(userId);
+      const data = await getMyRecords(userId, gymId);
       setMyRecords(data);
     } finally {
       setRecordsLoading(false);
@@ -19,7 +19,7 @@ export const useMyRecords = (userId: string) => {
 
   useEffect(() => {
     fetchRecords();
-  }, [userId]);
+  }, [userId, gymId]);
 
   return { myRecords, recordsLoading, refetch: fetchRecords };
 };

@@ -6,14 +6,17 @@ import { useAuthGuard } from "@/hooks/auth/useAuthGuard";
 import { useTodayWod } from "@/hooks/wod/useTodayWod";
 import AttendanceCalendar from "@/app/components/ui/AttendanceCalendar";
 import { useDate } from "@/hooks/user/useDate";
+import { useUserInfo } from "@/hooks/user/useUserInfo";
 
 export default function Home() {
   const router = useRouter();
 
   // 로그인 훅
   const { user, loading } = useAuthGuard();
+  const { userInfo } = useUserInfo(user?.uid ?? "");
+  const gymId = userInfo?.currentGymId ?? "";
   // wod 데이터 불러오기
-  const { wod, wodLoading } = useTodayWod();
+  const { wod, wodLoading } = useTodayWod(gymId);
   // 오늘 날짜 불러오기
   const { dateStr } = useDate();
 
@@ -46,7 +49,7 @@ export default function Home() {
           <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">이번 달</h2>
           <span className="text-xs text-zinc-500">{new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long" })}</span>
         </div>
-        {user && <AttendanceCalendar userId={user.uid} />}
+        {user && <AttendanceCalendar userId={user.uid} gymId={gymId} />}
       </section>
       {/* 공지 카드 */}
       {wod?.note && (

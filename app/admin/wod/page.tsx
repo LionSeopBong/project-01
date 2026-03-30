@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { createNotification, createWod, getAllUsers } from "@/lib/firestore";
+import { createNotification, createWod, getGymUsers } from "@/lib/firestore";
 import { WodPart } from "@/types/wod";
 import { useAdminGuard } from "@/hooks/auth/useAdminGuard";
+import { useUserInfo } from "@/hooks/user/useUserInfo";
 
 const PART_LABELS = ["A", "B", "C"] as const;
 const WOD_TYPES = ["For Time", "AMRAP", "EMOM", "Every", "Strength", "Accessory"];
@@ -25,57 +26,53 @@ const defaultPart = (part: "A" | "B" | "C"): WodPart => ({
 });
 
 export default function AdminWodPage() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
-
-  // 관리자 체크
-
   const { isAdmin, checking } = useAdminGuard();
+  const { userInfo } = useUserInfo(user?.uid ?? "");
+  const gymId = userInfo?.currentGymId ?? "";
 
-  // 폼 상태
   const [date, setDate] = useState("");
   const [note, setNote] = useState("");
   const [title, setTitle] = useState("");
-
   const [parts, setParts] = useState<WodPart[]>([defaultPart("A")]);
-
   const [submitting, setSubmitting] = useState(false);
 
-  // 파트 추가
   const addPart = () => {
     if (parts.length >= 3) return;
     const nextPart = PART_LABELS[parts.length];
     setParts([...parts, defaultPart(nextPart)]);
   };
 
-  // 파트 삭제
   const removePart = (index: number) => {
     setParts(parts.filter((_, i) => i !== index));
   };
 
-  // 파트 필드 수정
   const updatePart = (index: number, field: keyof WodPart, value: any) => {
     const updated = [...parts];
     updated[index] = { ...updated[index], [field]: value };
     setParts(updated);
   };
 
-  // WOD 등록
   const handleSubmit = async () => {
     if (!date) return alert("날짜를 입력해주세요.");
     if (!title) return alert("WOD 제목을 입력해주세요.");
+    if (!gymId) return alert("체육관 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
 
     setSubmitting(true);
     try {
+      // gymId 포함해서 WOD 등록
       await createWod({
         date,
         parts,
         title,
         note,
+        gymId,
         createdAt: null,
       });
-      // 모든 유저에게 알림 전송
-      const users = await getAllUsers();
+
+      // 해당 체육관 멤버에게만 알림 전송
+      const users = await getGymUsers(gymId);
       await Promise.all(
         users.map((u) =>
           createNotification({
@@ -83,11 +80,11 @@ export default function AdminWodPage() {
             type: "wod_registered",
             message: `오늘의 WOD가 등록되었어요!`,
             isRead: false,
-            // createdAt: null,
             link: "/wod",
           }),
         ),
       );
+
       alert("WOD 등록 완료!");
       router.push("/home");
     } catch (error) {
@@ -133,7 +130,6 @@ export default function AdminWodPage() {
         {/* 파트 목록 */}
         {parts.map((part, partIndex) => (
           <div key={partIndex} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-5">
-            {/* 파트 헤더 */}
             <div className="flex items-center justify-between">
               <span className="text-xl font-black text-[#E63946]">{part.part} 파트</span>
               {parts.length > 1 && (
@@ -167,7 +163,6 @@ export default function AdminWodPage() {
               <div className="space-y-2">
                 {part.weights?.map((w, wIndex) => (
                   <div key={wIndex} className="flex gap-2 items-center flex-wrap">
-                    {/* 도구 선택 */}
                     <select
                       value={w.tool}
                       onChange={(e) => {
@@ -182,8 +177,6 @@ export default function AdminWodPage() {
                       <option value="Kettlebell">Kettlebell</option>
                       <option value="Other">Other</option>
                     </select>
-
-                    {/* 남성 무게 */}
                     <input
                       type="number"
                       value={w.maleWeight || ""}
@@ -195,8 +188,6 @@ export default function AdminWodPage() {
                       placeholder="♂"
                       className="w-20 bg-blue-950 border border-blue-700 rounded-lg px-3 py-2 text-blue-300 text-sm focus:outline-none"
                     />
-
-                    {/* 여성 무게 */}
                     <input
                       type="number"
                       value={w.femaleWeight || ""}
@@ -208,8 +199,6 @@ export default function AdminWodPage() {
                       placeholder="♀"
                       className="w-20 bg-pink-950 border border-pink-700 rounded-lg px-3 py-2 text-pink-300 text-sm focus:outline-none"
                     />
-
-                    {/* 단위 선택 */}
                     <select
                       value={w.unit}
                       onChange={(e) => {
@@ -222,8 +211,6 @@ export default function AdminWodPage() {
                       <option value="lb">lb</option>
                       <option value="kg">kg</option>
                     </select>
-
-                    {/* 삭제 */}
                     <button
                       onClick={() => {
                         const updated = [...parts];
@@ -237,8 +224,6 @@ export default function AdminWodPage() {
                   </div>
                 ))}
               </div>
-
-              {/* 무게 추가 버튼 */}
               <button
                 onClick={() => {
                   const updated = [...parts];
@@ -250,6 +235,7 @@ export default function AdminWodPage() {
                 + 무게 추가
               </button>
             </div>
+
             {/* 팀 설정 */}
             <div>
               <div className="flex items-center gap-3 mb-3">
@@ -264,7 +250,6 @@ export default function AdminWodPage() {
                   팀 WOD
                 </label>
               </div>
-
               {part.isTeam && (
                 <div>
                   <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">팀 인원수</label>
@@ -284,6 +269,7 @@ export default function AdminWodPage() {
                 </div>
               )}
             </div>
+
             {/* 와드 설명 */}
             <div>
               <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">WOD</label>
@@ -323,7 +309,7 @@ export default function AdminWodPage() {
         {/* 등록 버튼 */}
         <button
           onClick={handleSubmit}
-          disabled={submitting}
+          disabled={submitting || !gymId}
           className="w-full py-4 bg-[#E63946] rounded-xl text-white font-black text-lg tracking-wider uppercase disabled:opacity-50 transition"
         >
           {submitting ? "등록 중..." : "WOD 등록"}
