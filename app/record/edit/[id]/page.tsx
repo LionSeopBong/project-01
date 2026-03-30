@@ -433,7 +433,7 @@ export default function MyRecordsEdit() {
 
       {/*  제출 버튼 */}
       <button
-        onClick={() => handleUpdate(user?.uid ?? "", userInfo?.name ?? "", allPartRecords)}
+        onClick={() => handleUpdate(user?.uid ?? "", userInfo?.name ?? "", allPartRecords, userInfo?.currentGymId ?? "")}
         disabled={submitting}
         className="w-full py-4 mt-3 bg-[#E63946] rounded-xl text-white font-black text-lg tracking-wider uppercase disabled:opacity-50 transition"
       >

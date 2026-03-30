@@ -9,13 +9,9 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
   const [selectedPart, setSelectedPart] = useState(initialRecord?.wodPart ?? "");
   const [submitting, setSubmitting] = useState(false);
 
-  // 파트별 recordParts 관리
   const [recordParts, setRecordParts] = useState<Record<string, Partial<WorkoutRecord>>>({});
-
-  // 파트별 시간 관리
   const [finishTimes, setFinishTimes] = useState<Record<string, { min: number; sec: number }>>({});
 
-  // 현재 파트의 recordPart
   const recordPart = recordParts[selectedPart] ?? {
     isDNF: false,
     level: "R'xd",
@@ -32,7 +28,6 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
     hasTotalRepsOnly: false,
   };
 
-  // 현재 파트의 시간
   const finishMin = finishTimes[selectedPart]?.min ?? 0;
   const finishSec = finishTimes[selectedPart]?.sec ?? 0;
 
@@ -56,7 +51,6 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
 
   const currentPart = wod?.parts.find((part) => part.part === selectedPart);
 
-  // 수정 페이지용 초기화
   useEffect(() => {
     if (!initialRecord) return;
     setRecordParts({ [initialRecord.wodPart ?? ""]: initialRecord });
@@ -69,7 +63,6 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
     });
   }, [initialRecord?.id]);
 
-  // wod 로드 후 첫 파트 자동 선택
   useEffect(() => {
     if (wod && !initialRecord && !selectedPart) {
       setSelectedPart(wod.parts[0].part);
@@ -80,14 +73,14 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
     setSelectedPart(part);
   };
 
-  const handleSubmit = async (userId: string, userName: string, gender: string) => {
+  // gymId 파라미터 추가
+  const handleSubmit = async (userId: string, userName: string, gender: string, gymId: string) => {
     if (!wod) return;
     setSubmitting(true);
     try {
-      // 작성된 모든 파트 저장
       for (const part of wod.parts) {
         const partRecord = recordParts[part.part];
-        if (!partRecord) continue; // 작성 안 한 파트는 스킵
+        if (!partRecord) continue;
 
         const partFinishMin = finishTimes[part.part]?.min ?? 0;
         const partFinishSec = finishTimes[part.part]?.sec ?? 0;
@@ -96,6 +89,7 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
           ...partRecord,
           userId,
           userName,
+          gymId,
           wodId: wod.id,
           wodName: wod.title,
           wodPart: part.part,
@@ -122,6 +116,7 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
       setSubmitting(false);
     }
   };
+
   const initAllParts = (records: WorkoutRecord[]) => {
     const parts: Record<string, Partial<WorkoutRecord>> = {};
     const times: Record<string, { min: number; sec: number }> = {};
@@ -138,7 +133,9 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
     setFinishTimes(times);
     setSelectedPart(records[0]?.wodPart ?? "");
   };
-  const handleUpdate = async (userId: string, userName: string, existingRecords: WorkoutRecord[]) => {
+
+  // gymId 파라미터 추가
+  const handleUpdate = async (userId: string, userName: string, existingRecords: WorkoutRecord[], gymId: string) => {
     if (!wod || !currentPart) return;
     setSubmitting(true);
     try {
@@ -152,6 +149,7 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
           ...partRecord,
           userId,
           userName,
+          gymId,
           wodId: wod.id,
           wodName: wod.title,
           wodPart: part.part,

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getComments, addComment, deleteComments, toggleLike, getAllUsers, createNotification } from "@/lib/firestore";
+import { getComments, addComment, deleteComments, toggleLike, createNotification } from "@/lib/firestore";
 import { WodComment } from "@/types/wod";
 import { Timestamp } from "firebase/firestore";
 
