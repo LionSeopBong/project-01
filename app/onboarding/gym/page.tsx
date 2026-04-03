@@ -4,11 +4,11 @@ import { useAuthGuard } from "@/hooks/auth/useAuthGuard";
 import { createGym, getGymByCode, joinGymByCode, updateUser, updateGym } from "@/lib/firestore";
 import { uploadGymImage } from "@/lib/storage";
 import { Gym } from "@/types/wod";
-import { GYM_CODE_LENGTH } from "@/lib/constants";
+import { GYM_CODE_LENGTH, PUBLIC_GYM_ID } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-type Role = "idle" | "coach" | "member";
+type Role = "idle" | "coach" | "member" | "nomad";
 
 export default function OnboardingGymPage() {
   const { user, loading } = useAuthGuard();
@@ -117,7 +117,19 @@ export default function OnboardingGymPage() {
       setSubmitting(false);
     }
   };
-
+  // 가입 박스 없음
+  const handleNoGym = async () => {
+    if (!user) return;
+    setSubmitting(true);
+    try {
+      await updateUser(user.uid, { currentGymId: PUBLIC_GYM_ID });
+      router.push("/home");
+    } catch (error: any) {
+      alert(error.message ?? "오류가 발생했습니다");
+    } finally {
+      setSubmitting(false);
+    }
+  };
   // 코치 - 체육관 생성
   const handleCreate = async () => {
     if (!user) return;
@@ -195,6 +207,22 @@ export default function OnboardingGymPage() {
             <div className="text-left">
               <p className="text-white font-black text-base group-hover:text-[#E63946] transition">멤버예요</p>
               <p className="text-zinc-500 text-xs mt-0.5">코치에게 코드를 받았어요</p>
+            </div>
+            <span className="ml-auto text-zinc-600 group-hover:text-[#E63946] transition">→</span>
+          </button>
+
+          <button
+            // onClick={() => setRole("nomad")}
+            onClick={handleNoGym}
+            disabled={submitting}
+            className="w-full flex items-center gap-4 px-5 py-5 bg-zinc-900 border border-zinc-700 rounded-2xl hover:border-[#E63946] transition group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center flex-shrink-0">
+              <span className="text-2xl">🌐</span>
+            </div>
+            <div className="text-left">
+              <p className="text-white font-black text-base group-hover:text-[#E63946] transition">아직 가입하지 않았어요</p>
+              <p className="text-zinc-500 text-xs mt-0.5">Solo Athlete으로 시작할게요</p>
             </div>
             <span className="ml-auto text-zinc-600 group-hover:text-[#E63946] transition">→</span>
           </button>
