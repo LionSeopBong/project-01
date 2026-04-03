@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { createNotification, createWod, getGymUsers } from "@/lib/firestore";
 import { WodPart } from "@/types/wod";
 import { useAdminGuard } from "@/hooks/auth/useAdminGuard";
+import { PUBLIC_GYM_ID } from "@/lib/constants";
 import { useUserInfo } from "@/hooks/user/useUserInfo";
+import { useGymManager } from "@/hooks/user/useGymManager";
 
 const PART_LABELS = ["A", "B", "C"] as const;
 const WOD_TYPES = ["For Time", "AMRAP", "EMOM", "Every", "Strength", "Accessory"];
@@ -29,8 +31,15 @@ export default function AdminWodPage() {
   const { user } = useAuth();
   const router = useRouter();
   const { isAdmin, checking } = useAdminGuard();
-  const { userInfo } = useUserInfo(user?.uid ?? "");
-  const gymId = userInfo?.currentGymId ?? "";
+  const { userInfo, refetch } = useUserInfo(user?.uid ?? "");
+  const isMaster = userInfo?.role === "master";
+
+  // 가입된 체육관 목록 가져오기
+  const { gyms } = useGymManager(user?.uid ?? "", userInfo?.currentGymId ?? "", refetch);
+
+  // 선택된 등록 대상 체육관 (기본값: currentGymId)
+  const [targetGymId, setTargetGymId] = useState<string | null>(null);
+  const gymId = targetGymId ?? userInfo?.currentGymId ?? "";
 
   const [date, setDate] = useState("");
   const [note, setNote] = useState("");
@@ -105,6 +114,34 @@ export default function AdminWodPage() {
       </h1>
 
       <div className="space-y-6">
+        {/* 등록 대상 체육관 선택 (admin/master 공통) */}
+        <div>
+          <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">등록 대상 체육관</label>
+          <div className="flex flex-wrap gap-2">
+            {/* master만 public 선택 가능 */}
+            {isMaster && (
+              <button
+                onClick={() => setTargetGymId(PUBLIC_GYM_ID)}
+                className={`px-4 py-2.5 rounded-xl text-sm font-black border transition ${gymId === PUBLIC_GYM_ID ? "bg-[#E63946] border-[#E63946] text-white" : "bg-zinc-800 border-zinc-700 text-zinc-400"}`}
+              >
+                🌐 Solo Athlete
+              </button>
+            )}
+            {/* 가입된 체육관 목록 */}
+            {gyms
+              .filter((g) => g.id !== PUBLIC_GYM_ID)
+              .map((gym) => (
+                <button
+                  key={gym.id}
+                  onClick={() => setTargetGymId(gym.id)}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-black border transition ${gymId === gym.id ? "bg-[#E63946] border-[#E63946] text-white" : "bg-zinc-800 border-zinc-700 text-zinc-400"}`}
+                >
+                  🏋️ {gym.name}
+                </button>
+              ))}
+          </div>
+        </div>
+
         {/* WOD 제목 */}
         <div>
           <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">WOD 제목</label>

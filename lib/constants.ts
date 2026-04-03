@@ -117,3 +117,5 @@ export const ENDURANCE_WIGHTS: Record<string, number> = {
 };
 // 박스초대 코드 자릿수
 export const GYM_CODE_LENGTH = 6;
+// 박스 미가입 유저 Solo Athlete
+export const PUBLIC_GYM_ID = "public";

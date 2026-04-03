@@ -322,7 +322,7 @@ export const removeGymMember = async (memberId: string) => {
 };
 
 // 체육관가입 플로우 ********************************************************************************
-export const joinGymByCode = async (code: string, userId: string): Promise<string> => {
+export const joinGymByCode = async (code: string, userId: string, updateCurrentGym: boolean = false): Promise<string> => {
   const gym = await getGymByCode(code);
   if (!gym) throw new Error("존재하지 않는 박스(체육관) 코드입니다.");
 

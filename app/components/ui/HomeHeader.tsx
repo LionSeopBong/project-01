@@ -1,7 +1,8 @@
 import { useAuth } from "@/context/AuthContext";
 import { useUserInfo } from "@/hooks/user/useUserInfo";
 import { logOut } from "@/lib/auth";
-import { deleteReadNotifications, getUser } from "@/lib/firestore";
+import { deleteReadNotifications } from "@/lib/firestore";
+import { useIsAdmin } from "@/hooks/auth/useIsAdmin";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,10 +20,10 @@ const menuItems = [
 
 export default function HomeHeader() {
   const { user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
   const { userInfo } = useUserInfo(user?.uid ?? "");
+  const { isAdmin } = useIsAdmin(user?.uid);
 
   // 훅 추가
   const { notifications, notificationsLoading, unreadCount, readAll } = useNotifications(user?.uid ?? "");
@@ -31,14 +32,7 @@ export default function HomeHeader() {
     await logOut();
     router.push("/");
   };
-  useEffect(() => {
-    const checkAdmin = async () => {
-      if (!user) return;
-      const userData = await getUser(user.uid);
-      setIsAdmin(userData?.role === "admin");
-    };
-    checkAdmin();
-  }, [user]);
+
   return (
     <>
       {/* 헤더 */}

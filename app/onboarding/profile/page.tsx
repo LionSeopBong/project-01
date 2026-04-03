@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthGuard } from "@/hooks/auth/useAuthGuard";
+import { PUBLIC_GYM_ID } from "@/lib/constants";
 import { createUser } from "@/lib/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -38,7 +39,7 @@ export default function OnboardingProfilePage() {
         unit,
         profileImage: user.photoURL ?? "",
         role: "user",
-        currentGymId: "",
+        currentGymId: PUBLIC_GYM_ID, // 기본값
       });
       // router.push("/home");
       router.push("/onboarding/gym");
