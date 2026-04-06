@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDumbbell, faFilePen, faHandFist, faUser, faGear, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { faDumbbell, faFilePen, faHandFist, faUser, faGear, faRightFromBracket, faPeopleGroup } from "@fortawesome/free-solid-svg-icons";
 import { useNotifications } from "@/hooks/user/useNotifications";
 import { getTimeAgo } from "@/lib/utils";
 const menuItems = [
@@ -159,6 +159,16 @@ export default function HomeHeader() {
             >
               <FontAwesomeIcon icon={faGear} size="xl" className="text-[#FF3B30]" />
               <span className="font-bold tracking-wider uppercase text-sm">WOD 관리</span>
+            </Link>
+          )}
+          {isAdmin && (
+            <Link
+              href="/admin/members"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-4 px-4 py-4 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+            >
+              <FontAwesomeIcon icon={faPeopleGroup} size="xl" className="text-[#FF3B30]" />
+              <span className="font-bold tracking-wider uppercase text-sm">멤버 관리</span>
             </Link>
           )}
           {/* 로그아웃 */}
