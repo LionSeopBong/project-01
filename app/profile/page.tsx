@@ -401,8 +401,9 @@ export default function ProfilePage() {
                 // 게스트 일때
                 <div className="w-full py-2.5 text-center text-zinc-500 text-sm">체육관 가입은 회원가입 후 이용이 가능합니다.</div>
               ) : (
+                // 일반 유저
+
                 <>
-                  // 일반 유저
                   <button
                     onClick={() => setGymMode("join")}
                     className="flex-1 py-2.5 border border-zinc-700 rounded-xl text-zinc-400 text-sm font-bold hover:border-[#E63946] hover:text-[#E63946] transition"
