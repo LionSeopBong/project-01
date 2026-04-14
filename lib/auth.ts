@@ -1,6 +1,7 @@
 import { auth, db } from "./firebase";
-import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { GoogleAuthProvider, signInAnonymously, signInWithPopup, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { PUBLIC_GYM_ID } from "./constants";
 
 const provider = new GoogleAuthProvider();
 
@@ -28,6 +29,25 @@ export const signInWithGoogle = async () => {
   }
 
   return { user, isNewUser: false };
+};
+
+// 익명 로그인
+export const signInAsGuest = async () => {
+  const result = await signInAnonymously(auth);
+  const user = result.user;
+  //익명이라 존재여부 확인 불필요
+  await setDoc(doc(db, "users", user.uid), {
+    name: "Guest",
+    profileImage: "",
+    gender: "",
+    weight: 0,
+    height: 0,
+    unit: "kg",
+    role: "user",
+    currentGymId: PUBLIC_GYM_ID,
+    createdAt: new Date(),
+  });
+  return { user, isNewUser: true };
 };
 
 // 로그아웃

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { signInWithGoogle } from "@/lib/auth";
+import { signInAsGuest, signInWithGoogle } from "@/lib/auth";
 import { getUser } from "@/lib/firestore";
 import { useInAppBrowser } from "@/hooks/auth/useInAppBrowser";
 import Image from "next/image";
@@ -32,6 +32,21 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.log("로그인 실패", error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  //게스트(익명) 로그인
+  const handleGuest = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      await signInAsGuest();
+      router.push("/home");
+    } catch (error) {
+      alert("게스트 로그인실패");
+      console.log("게스트 로그인실패", error);
     } finally {
       setSubmitting(false);
     }
@@ -86,6 +101,10 @@ export default function LoginPage() {
           <path d="M564 325.8C564 467.3 467.1 568 324 568C186.8 568 76 457.2 76 320C76 182.8 186.8 72 324 72C390.8 72 447 96.5 490.3 136.9L422.8 201.8C334.5 116.6 170.3 180.6 170.3 320C170.3 406.5 239.4 476.6 324 476.6C422.2 476.6 459 406.2 464.8 369.7L324 369.7L324 284.4L560.1 284.4C562.4 297.1 564 309.3 564 325.8z" />
         </svg>
         {submitting ? "로그인 중..." : <span className="text-lg text-black font-bold">Google 시작하기</span>}
+      </button>
+      {/* 게스트 버튼 */}
+      <button onClick={handleGuest} disabled={submitting} className="text-zinc-500 text-sm hover:text-zinc-300 transition underline">
+        게스트로 체험하기
       </button>
     </main>
   );

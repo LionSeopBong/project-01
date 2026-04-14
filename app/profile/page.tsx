@@ -17,6 +17,8 @@ export default function ProfilePage() {
   const { userInfo, userLoading, refetch } = useUserInfo(user?.uid ?? "");
   const router = useRouter();
   const role = userInfo?.role ?? "user";
+  //익명 체크
+  const isGuest = user?.isAnonymous ?? false;
 
   // 프로필 수정
   const [isEditing, setIsEditing] = useState(false);
@@ -90,6 +92,9 @@ export default function ProfilePage() {
   };
 
   const handleLogout = async () => {
+    if (user?.isAnonymous) {
+      if (!confirm("게스트 데이터는 로그아웃 시 삭제됩니다.\n그래도 로그 아웃 하시겠습니까?")) return;
+    }
     await logOut();
     router.push("/");
   };
@@ -392,19 +397,27 @@ export default function ProfilePage() {
           {/* 액션 버튼 */}
           {gymMode === "idle" && (
             <div className="flex gap-2 pt-2 border-t border-zinc-800">
-              <button
-                onClick={() => setGymMode("join")}
-                className="flex-1 py-2.5 border border-zinc-700 rounded-xl text-zinc-400 text-sm font-bold hover:border-[#E63946] hover:text-[#E63946] transition"
-              >
-                + 체육관 가입
-              </button>
-              {role === "master" && (
-                <button
-                  onClick={() => setGymMode("create")}
-                  className="flex-1 py-2.5 border border-zinc-700 rounded-xl text-zinc-400 text-sm font-bold hover:border-[#E63946] hover:text-[#E63946] transition"
-                >
-                  + 체육관 생성
-                </button>
+              {isGuest ? (
+                // 게스트 일때
+                <div className="w-full py-2.5 text-center text-zinc-500 text-sm">체육관 가입은 회원가입 후 이용이 가능합니다.</div>
+              ) : (
+                <>
+                  // 일반 유저
+                  <button
+                    onClick={() => setGymMode("join")}
+                    className="flex-1 py-2.5 border border-zinc-700 rounded-xl text-zinc-400 text-sm font-bold hover:border-[#E63946] hover:text-[#E63946] transition"
+                  >
+                    + 체육관 가입
+                  </button>
+                  {role === "master" && (
+                    <button
+                      onClick={() => setGymMode("create")}
+                      className="flex-1 py-2.5 border border-zinc-700 rounded-xl text-zinc-400 text-sm font-bold hover:border-[#E63946] hover:text-[#E63946] transition"
+                    >
+                      + 체육관 생성
+                    </button>
+                  )}
+                </>
               )}
             </div>
           )}
