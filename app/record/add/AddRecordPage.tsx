@@ -420,7 +420,7 @@ export default function AddRecordPage() {
 
       {/*  제출 버튼 */}
       <button
-        onClick={() => handleSubmit(user?.uid ?? "", userInfo?.name ?? "", userInfo?.gender ?? "", userInfo?.currentGymId ?? "")}
+        onClick={() => handleSubmit(user?.uid ?? "", userInfo?.name ?? "", userInfo?.gender || "male", userInfo?.currentGymId ?? "")}
         disabled={submitting}
         className="w-full py-4 mt-3 bg-[#E63946] rounded-xl text-white font-black text-lg tracking-wider uppercase disabled:opacity-50 transition"
       >

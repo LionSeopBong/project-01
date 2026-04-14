@@ -79,8 +79,22 @@ export const useRecordForm = (wod: Wod | null, initialRecord?: Partial<WorkoutRe
     setSubmitting(true);
     try {
       for (const part of wod.parts) {
-        const partRecord = recordParts[part.part];
-        if (!partRecord) continue;
+        const partRecord = recordParts[part.part] ?? {
+          isDNF: false,
+          level: "R'xd",
+          weights: [],
+          wodTeam: false,
+          partnerName: "",
+          partnerWeight: 0,
+          partnerDifferentWeight: false,
+          totalReps: 0,
+          rounds: 0,
+          reps: 0,
+          failCount: 0,
+          hasRepsOnly: false,
+          hasTotalRepsOnly: false,
+        };
+        // if (!partRecord) continue;
 
         const partFinishMin = finishTimes[part.part]?.min ?? 0;
         const partFinishSec = finishTimes[part.part]?.sec ?? 0;
