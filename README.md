@@ -56,7 +56,7 @@
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      01. 시작 화면                           │
-│         배경: 헬스장 분위기 + WODX 로고 + [START] 버튼        │
+│         배경:  WODX 로고 + [START] 버튼                       │
 └─────────────────────────┬───────────────────────────────────┘
                           │ START 버튼 클릭
                           ▼
@@ -134,6 +134,159 @@
 
 ---
 
+## 시스템 아키텍처
+
+### 전체 구조
+
+```
+사용자 (Browser)
+    ↓
+Next.js 14 (App Router)
+  ├── Server Component  → 초기 데이터 SSR
+  └── Client Component → 상태관리 / 이벤트 처리
+    ↓
+Firebase
+  ├── Firebase Auth    → 인증 (Google OAuth / 익명)
+  ├── Cloud Firestore  → NoSQL 실시간 DB
+  └── Firebase Storage → 이미지 저장(미구현-테스트 진행중)
+    ↓
+Vercel (배포 / CI-CD)
+  └── GitHub 연동 → push 시 자동 빌드 & 배포
+```
+
+---
+
+### Firestore 컬렉션 구조
+
+```
+gyms/                        # 체육관
+  └── {gymId}/
+        ├── name
+        ├── code
+        └── imageUrl
+
+gymMembers/                  # 체육관 멤버십
+  └── {memberId}/
+        ├── gymId
+        ├── userId
+        └── role             # admin / member
+
+users/                       # 유저
+  └── {userId}/
+        ├── name
+        ├── role             # master / admin / user
+        └── currentGymId
+
+wods/                        # 오늘의 운동
+  └── {wodId}/
+        ├── gymId
+        ├── title
+        ├── date
+        └── parts[]
+              ├── type       # For Time / AMRAP / EMOM / Every / Strength
+              ├── weights[]
+              └── isTeam
+
+workoutRecords/              # 운동 기록
+  └── {recordId}/
+        ├── gymId
+        ├── userId
+        ├── wodId
+        ├── level            # Rxd / Scale / Beginner
+        ├── finishTime
+        └── weights[]
+
+notifications/               # 알림
+  └── {notificationId}/
+        ├── gymId
+        ├── userId
+        └── type
+
+prRecords/                   # PR 기록
+  └── {prId}/
+        ├── userId
+        └── category         # Power / Strength / Skill / Endurance / Conditioning
+```
+
+---
+
+### Role 기반 권한 구조
+
+```
+master
+  ├── 전체 체육관 관리
+  ├── Solo Athlete WOD 등록
+  └── 모든 admin 권한 포함
+
+admin
+  ├── 소속 체육관 WOD 등록 / 수정 / 삭제
+  ├── 멤버 관리 (강퇴 / 역할 변경)
+  └── WOD 등록 시 전체 알림 발송
+
+user
+  ├── WOD 조회 및 기록 등록
+  ├── 리더보드 확인
+  └── PR Board 관리
+
+guest (익명 인증)
+  ├── WOD 조회 및 기록 등록
+  └── 체육관 가입 불가
+```
+
+---
+
+### 커스텀 훅 구조
+
+```
+hooks/
+  ├── auth/
+  │     ├── useAuthGuard       # 로그인 여부 체크 → 미로그인 시 /login
+  │     ├── useAdminGuard      # admin/master 체크 → 권한 없으면 /home
+  │     ├── useMasterGuard     # master 전용 체크
+  │     └── useInAppBrowser    # 카카오 등 인앱브라우저 감지
+  │
+  ├── wod/
+  │     ├── useTodayWod        # 오늘 WOD 조회
+  │     └── useWodByDate       # 날짜별 WOD 조회
+  │
+  ├── record/
+  │     ├── useMyRecords       # 내 기록 조회
+  │     ├── useLeaderboard     # 리더보드 조회
+  │     └── useRecordForm      # 기록 등록/수정 폼 상태관리
+  │
+  └── user/
+        ├── useUserInfo        # 유저 정보 조회
+        ├── useGymManager      # 체육관 가입/생성/전환/탈퇴/멤버관리
+        └── useCalendar        # 출석 캘린더
+```
+
+---
+
+### 멀티 체육관 (gymId 기반) 아키텍처
+
+```
+기존 구조 (단일 체육관)
+  모든 데이터 → 단일 컬렉션으로 관리
+
+개선된 구조 (gymId 기반 멀티 체육관)
+  모든 쿼리에 gymId 필터 적용
+    ├── getTodayWod(gymId)
+    ├── getMyRecords(userId, gymId)
+    ├── getLeaderboard(date, gymId)
+    └── getGymUsers(gymId)
+
+  체육관별 독립적인 데이터 관리
+    ├── WOD
+    ├── 기록
+    ├── 리더보드
+    └── 멤버
+
+  PUBLIC_GYM_ID = "public"
+    └── Solo Athlete → 체육관 없는 유저 기본 배정
+```
+
+---
+
 ## 폴더 구조
 
 ```
@@ -199,13 +352,13 @@ npm install
 `.env.local` 파일을 생성하고 Firebase 설정값을 입력.
 
 ```env
- NEXT_PUBLIC_FIREBASE_API_KEY ="AIzaSyDKnX8bCr1I4pYnbb2JHGhyKQwNXDIIg3Q"
-  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN= "wodx-c7139.firebaseapp.com"
-  NEXT_PUBLIC_FIREBASE_PROJECT_ID= "wodx-c7139"
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET= "wodx-c7139.firebasestorage.app"
-  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID= "340556643591"
-  NEXT_PUBLIC_FIREBASE_APP_ID= "1:340556643591:web:133cf0369ef710a02c99a2"
-  NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID = "G-P0PHLQQ4H2"
+NEXT_PUBLIC_FIREBASE_API_KEY="your_api_key_here"
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="your_auth_domain_here"
+NEXT_PUBLIC_FIREBASE_PROJECT_ID="your_project_id_here"
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="your_storage_bucket_here"
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="your_messaging_sender_id_here"
+NEXT_PUBLIC_FIREBASE_APP_ID="your_app_id_here"
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID="your_measurement_id_here"
 ```
 
 ### 실행
